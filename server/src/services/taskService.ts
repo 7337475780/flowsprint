@@ -276,3 +276,159 @@ export const deleteTask = async (id: string, user: IUser): Promise<void> => {
 
   await Task.findByIdAndDelete(id);
 };
+
+/**
+ * Direct task status and column index movement logic.
+ */
+export const moveTask = async (
+  id: string,
+  newStatus: 'backlog' | 'todo' | 'in-progress' | 'review' | 'done',
+  newOrder: number,
+  user: IUser
+): Promise<ITask> => {
+  const task = await Task.findById(id).populate('project', 'owner');
+  if (!task) {
+    throw new NotFoundError('Task was not found');
+  }
+
+  const projectOwner = (task.project as any).owner.toString();
+  const isProjectOwner = projectOwner === user._id.toString();
+  const isAssignee = task.assignee?.toString() === user._id.toString();
+
+  // Role Restriction: Admin, Managers, and Project Owners can move any task. Teammates can only move tasks assigned to them.
+  const isAuthorized = user.role === 'admin' || user.role === 'manager' || isProjectOwner || isAssignee;
+  if (!isAuthorized) {
+    throw new UnauthorizedError('Access denied. You can only move tasks assigned to you.');
+  }
+
+  const oldStatus = task.status;
+  const oldOrder = task.order;
+
+  if (oldStatus === newStatus && oldOrder === newOrder) {
+    return task;
+  }
+
+  // 1. Open slot in destination column (increment order of tasks with order >= newOrder)
+  await Task.updateMany(
+    {
+      project: task.project,
+      status: newStatus,
+      _id: { $ne: task._id },
+      order: { $gte: newOrder },
+    },
+    { $inc: { order: 1 } }
+  );
+
+  // 2. Close gap in source column (decrement order of tasks with order > oldOrder)
+  await Task.updateMany(
+    {
+      project: task.project,
+      status: oldStatus,
+      _id: { $ne: task._id },
+      order: { $gt: oldOrder },
+    },
+    { $inc: { order: -1 } }
+  );
+
+  // 3. Update task
+  task.status = newStatus;
+  task.order = newOrder;
+
+  task.activities.push({
+    action: 'moved',
+    performedBy: user._id,
+    details: `Task status changed from [${oldStatus}] to [${newStatus}]`,
+  });
+
+  return await task.save();
+};
+
+/**
+ * Reorders tasks within a column or across columns (Frontend Drag and Drop).
+ * Recalculates index orders dynamically to prevent index collisions.
+ */
+export const reorderTasks = async (
+  taskId: string,
+  sourceStatus: 'backlog' | 'todo' | 'in-progress' | 'review' | 'done',
+  destinationStatus: 'backlog' | 'todo' | 'in-progress' | 'review' | 'done',
+  sourceIndex: number,
+  destinationIndex: number,
+  user: IUser
+): Promise<ITask> => {
+  const task = await Task.findById(taskId).populate('project', 'owner');
+  if (!task) {
+    throw new NotFoundError('Task was not found');
+  }
+
+  const projectOwner = (task.project as any).owner.toString();
+  const isProjectOwner = projectOwner === user._id.toString();
+  const isAssignee = task.assignee?.toString() === user._id.toString();
+
+  const isAuthorized = user.role === 'admin' || user.role === 'manager' || isProjectOwner || isAssignee;
+  if (!isAuthorized) {
+    throw new UnauthorizedError('Access denied. You do not have permission to reorder this task.');
+  }
+
+  if (sourceStatus === destinationStatus) {
+    // Same-column index shift
+    if (sourceIndex === destinationIndex) {
+      return task;
+    }
+
+    if (sourceIndex < destinationIndex) {
+      // Dragging down: decrement items between source and destination
+      await Task.updateMany(
+        {
+          project: task.project,
+          status: sourceStatus,
+          order: { $gt: sourceIndex, $lte: destinationIndex },
+        },
+        { $inc: { order: -1 } }
+      );
+    } else {
+      // Dragging up: increment items between destination and source
+      await Task.updateMany(
+        {
+          project: task.project,
+          status: sourceStatus,
+          order: { $gte: destinationIndex, $lt: sourceIndex },
+        },
+        { $inc: { order: 1 } }
+      );
+    }
+
+    task.order = destinationIndex;
+  } else {
+    // Cross-column index shift
+    // 1. Close gap in source column
+    await Task.updateMany(
+      {
+        project: task.project,
+        status: sourceStatus,
+        order: { $gt: sourceIndex },
+      },
+      { $inc: { order: -1 } }
+    );
+
+    // 2. Open slot in destination column
+    await Task.updateMany(
+      {
+        project: task.project,
+        status: destinationStatus,
+        order: { $gte: destinationIndex },
+      },
+      { $inc: { order: 1 } }
+    );
+
+    task.status = destinationStatus;
+    task.order = destinationIndex;
+
+    task.activities.push({
+      action: 'moved',
+      performedBy: user._id,
+      details: `Task status changed from [${sourceStatus}] to [${destinationStatus}]`,
+    });
+  }
+
+  return await task.save();
+};
