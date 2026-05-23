@@ -38,6 +38,7 @@ export interface ITask extends Document {
   dueDate?: Date;
   estimatedHours?: number;
   actualHours?: number;
+  storyPoints?: number;
   order: number;
   attachments: string[];
   isArchived: boolean;

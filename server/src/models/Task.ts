@@ -108,6 +108,11 @@ const taskSchema = new Schema<ITask, TaskModel>(
       type: Number,
       min: 0,
     },
+    storyPoints: {
+      type: Number,
+      min: [0, 'Story points cannot be negative'],
+      default: 0,
+    },
     order: {
       type: Number,
       required: true,
