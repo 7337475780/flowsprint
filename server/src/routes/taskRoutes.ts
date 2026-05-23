@@ -5,6 +5,8 @@ import {
   getTaskById,
   updateTask,
   deleteTask,
+  moveTask,
+  reorderTasks,
 } from '../controllers/taskController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import {
@@ -45,6 +47,20 @@ router.get('/:id', taskIdValidator, getTaskById);
  * @access  Private (Owner / Manager / Assignee only)
  */
 router.put('/:id', taskIdValidator, updateTaskValidator, updateTask);
+
+/**
+ * @route   PATCH /api/tasks/reorder
+ * @desc    Reorder tasks drag and drop column shifting
+ * @access  Private (Owner/Manager/Assignee only)
+ */
+router.patch('/reorder', reorderTasks);
+
+/**
+ * @route   PATCH /api/tasks/:id/move
+ * @desc    Move task status and order
+ * @access  Private (Owner/Manager/Assignee only)
+ */
+router.patch('/:id/move', taskIdValidator, moveTask);
 
 /**
  * @route   DELETE /api/tasks/:id

@@ -91,3 +91,58 @@ export const deleteTask = asyncHandler(async (req: AuthenticatedRequest, res: Re
 
   return sendSuccess(res, 'Task deleted successfully', {}, 200);
 });
+
+/**
+ * @route   PATCH /api/tasks/:id/move
+ * @desc    Move task status and order (lane movement)
+ * @access  Private (Owner/Manager/Assignee only)
+ */
+export const moveTask = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const user = req.user;
+  if (!user) {
+    res.status(401).json({ success: false, message: 'Unauthorized' });
+    return;
+  }
+
+  const { id } = req.params;
+  const { status, order } = req.body;
+
+  if (!status || order === undefined) {
+    res.status(400).json({
+      success: false,
+      message: 'Invalid request: "status" and "order" variables are required in body.',
+    });
+    return;
+  }
+
+  const task = await taskService.moveTask(id, status, order, user);
+
+  return sendSuccess(res, 'Task status moved successfully', task, 200);
+});
+
+/**
+ * @route   PATCH /api/tasks/reorder
+ * @desc    Reorder tasks drag and drop columns shifting
+ * @access  Private (Owner/Manager/Assignee only)
+ */
+export const reorderTasks = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const user = req.user;
+  if (!user) {
+    res.status(401).json({ success: false, message: 'Unauthorized' });
+    return;
+  }
+
+  const { taskId, sourceStatus, destinationStatus, sourceIndex, destinationIndex } = req.body;
+
+  if (!taskId || !sourceStatus || !destinationStatus || sourceIndex === undefined || destinationIndex === undefined) {
+    res.status(400).json({
+      success: false,
+      message: 'Invalid request parameters for drag and drop: "taskId", "sourceStatus", "destinationStatus", "sourceIndex", and "destinationIndex" are required.',
+    });
+    return;
+  }
+
+  const task = await taskService.reorderTasks(taskId, sourceStatus, destinationStatus, sourceIndex, destinationIndex, user);
+
+  return sendSuccess(res, 'Tasks reordered successfully', task, 200);
+});
