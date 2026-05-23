@@ -9,6 +9,12 @@ const projectSchema = new Schema<IProject, ProjectModel>(
       required: [true, 'Project name is required'],
       trim: true,
     },
+    key: {
+      type: String,
+      required: [true, 'Project short key is required'],
+      uppercase: true,
+      trim: true,
+    },
     slug: {
       type: String,
       unique: true,

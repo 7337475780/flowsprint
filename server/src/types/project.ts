@@ -5,6 +5,7 @@ import { Document, Schema, Model } from 'mongoose';
  */
 export interface IProject extends Document {
   name: string;
+  key: string;
   slug: string;
   description?: string;
   status: 'planning' | 'active' | 'on-hold' | 'completed' | 'cancelled';
