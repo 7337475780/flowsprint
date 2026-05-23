@@ -7,6 +7,7 @@ export interface ISprint extends Document {
   name: string;
   goal?: string;
   project: Schema.Types.ObjectId;
+  projectId?: Schema.Types.ObjectId;
   tasks: Schema.Types.ObjectId[];
   startDate?: Date;
   endDate?: Date;
@@ -19,6 +20,7 @@ export interface ISprint extends Document {
   members: Schema.Types.ObjectId[];
   retrospective?: string;
   isArchived: boolean;
+  archived?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

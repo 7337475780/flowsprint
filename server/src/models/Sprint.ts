@@ -18,6 +18,10 @@ const sprintSchema = new Schema<ISprint, SprintModel>(
       ref: 'Project',
       required: [true, 'Project reference is required'],
     },
+    projectId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Project',
+    },
     tasks: [
       {
         type: Schema.Types.ObjectId,
@@ -78,11 +82,32 @@ const sprintSchema = new Schema<ISprint, SprintModel>(
       type: Boolean,
       default: false,
     },
+    archived: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true, // Automatically manages createdAt and updatedAt
   }
 );
+
+// Pre-save Compatibility Hook
+sprintSchema.pre('save', function (next) {
+  if (this.projectId && !this.project) {
+    this.project = this.projectId;
+  } else if (this.project && !this.projectId) {
+    this.projectId = this.project;
+  }
+
+  if (this.archived !== undefined) {
+    this.isArchived = this.archived;
+  } else if (this.isArchived !== undefined) {
+    this.archived = this.isArchived;
+  }
+
+  next();
+});
 
 // Compounded index on project and status for fast search and aggregation
 sprintSchema.index({ project: 1, status: 1 });
