@@ -8,6 +8,8 @@ import healthRoutes from './routes/healthRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import taskRoutes from './routes/taskRoutes.js';
+import sprintRoutes from './routes/sprintRoutes.js';
+import analyticsRoutes from './routes/analyticsRoutes.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
 
 const app = express();
@@ -36,6 +38,8 @@ app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/sprints', sprintRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // 5. 404 Catch-All Fallback
 app.use((req, res) => {
