@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  TrendingUp,
 } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore.js';
 import { cn } from '../../lib/utils.js';
@@ -19,6 +20,7 @@ const NAV = [
   { label: 'Tasks',     href: '/tasks',       icon: ListTodo        },
   { label: 'Sprints',   href: '/sprints',     icon: Zap             },
   { label: 'Team',      href: '/team',        icon: Users           },
+  { label: 'Analytics', href: '/analytics',   icon: TrendingUp      },
   { label: 'Settings',  href: '/settings',    icon: Settings        },
 ];
 

@@ -27,12 +27,12 @@ export default function Navbar() {
 
   const pageTitle = PAGE_TITLES[location.pathname] || 'Workspace';
 
-  const initials = user?.name
+  const initials = (user?.name || 'User')
     .split(' ')
     .map((n) => n[0])
     .slice(0, 2)
     .join('')
-    .toUpperCase() || 'U';
+    .toUpperCase();
 
   // Close dropdown when clicking outside
   useEffect(() => {

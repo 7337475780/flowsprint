@@ -9,7 +9,7 @@ import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './modules/projects/project.routes.js';
 import taskRoutes from './modules/tasks/task.routes.js';
 import sprintRoutes from './modules/sprints/sprint.routes.js';
-import analyticsRoutes from './routes/analyticsRoutes.js';
+import analyticsRoutes from './modules/analytics/analytics.routes.js';
 import notificationRoutes from './modules/notifications/notification.routes.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
 

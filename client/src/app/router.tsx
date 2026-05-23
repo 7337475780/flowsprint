@@ -15,6 +15,7 @@ const SprintsPage   = lazy(() => import('../pages/SprintsPage.js'));
 const TeamPage      = lazy(() => import('../pages/TeamPage.js'));
 const SettingsPage  = lazy(() => import('../pages/SettingsPage.js'));
 const NotificationsPage = lazy(() => import('../pages/NotificationsPage.js'));
+const AnalyticsPage = lazy(() => import('../pages/AnalyticsPage.js'));
 
 const wrap = (el: React.ReactNode) => (
   <Suspense fallback={<Loader fullscreen />}>{el}</Suspense>
@@ -48,6 +49,7 @@ export const router = createBrowserRouter(
         { path: '/team',      element: wrap(<TeamPage />) },
         { path: '/settings',  element: wrap(<SettingsPage />) },
         { path: '/notifications', element: wrap(<NotificationsPage />) },
+        { path: '/analytics', element: wrap(<AnalyticsPage />) },
       ],
     },
 
