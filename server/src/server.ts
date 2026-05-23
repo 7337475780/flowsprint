@@ -1,5 +1,9 @@
+import dns from 'dns';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+
+// Force Node's DNS resolver to use Google & Cloudflare servers, bypassing local ISP blocks
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 // 1. Initialize environment configuration first
 dotenv.config();
