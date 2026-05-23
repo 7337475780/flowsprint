@@ -10,6 +10,7 @@ import projectRoutes from './modules/projects/project.routes.js';
 import taskRoutes from './modules/tasks/task.routes.js';
 import sprintRoutes from './modules/sprints/sprint.routes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
+import notificationRoutes from './modules/notifications/notification.routes.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
 
 const app = express();
@@ -47,6 +48,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/sprints', sprintRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // 5. 404 Catch-All Fallback
 app.use((req, res) => {

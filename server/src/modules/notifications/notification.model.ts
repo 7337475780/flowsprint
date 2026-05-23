@@ -1,33 +1,27 @@
-import { Schema, model, Document } from 'mongoose';
-
-export interface INotification extends Document {
-  recipient: Schema.Types.ObjectId;
-  sender?: Schema.Types.ObjectId;
-  type: 'task_assigned' | 'task_moved' | 'sprint_started' | 'comment_mention';
-  title: string;
-  message: string;
-  read: boolean;
-  link?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { Schema, model } from 'mongoose';
+import { INotification } from './notification.types.js';
 
 const notificationSchema = new Schema<INotification>(
   {
-    recipient: {
+    userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: [true, 'Recipient userId reference is required'],
       index: true,
     },
-    sender: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
     type: {
       type: String,
-      enum: ['task_assigned', 'task_moved', 'sprint_started', 'comment_mention'],
-      required: [true, 'Notification type category is required'],
+      enum: [
+        'task_assigned',
+        'task_updated',
+        'task_moved',
+        'sprint_started',
+        'sprint_completed',
+        'mention',
+        'comment_added',
+        'system_alert',
+      ],
+      required: [true, 'Notification category type is required'],
     },
     title: {
       type: String,
@@ -39,18 +33,39 @@ const notificationSchema = new Schema<INotification>(
       required: [true, 'Notification payload detail message is required'],
       trim: true,
     },
-    read: {
+    entityType: {
+      type: String,
+      enum: ['task', 'sprint', 'project', 'comment'],
+    },
+    entityId: {
+      type: Schema.Types.ObjectId,
+    },
+    isRead: {
       type: Boolean,
       default: false,
+      index: true,
     },
-    link: {
+    priority: {
       type: String,
-      trim: true,
+      enum: ['low', 'medium', 'high', 'critical', 'urgent'],
+      default: 'medium',
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    metadata: {
+      type: Schema.Types.Mixed,
+      default: {},
     },
   },
   {
     timestamps: true,
   }
 );
+
+// Compound index for optimal querying of user inbox lists and instant unread count badges
+notificationSchema.index({ userId: 1, isRead: 1, createdAt: -1 });
+notificationSchema.index({ userId: 1, createdAt: -1 });
 
 export const Notification = model<INotification>('Notification', notificationSchema);

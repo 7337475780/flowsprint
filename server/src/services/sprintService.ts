@@ -8,6 +8,7 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from '../utils/errors.js';
+import { bulkCreateNotification } from '../modules/notifications/notification.service.js';
 
 // ---------------------------------------------------------------------------
 // Private helper: verify a user can access a sprint's parent project
@@ -219,7 +220,32 @@ export const startSprint = async (id: string, user: IUser): Promise<ISprint> => 
   sprint.plannedPoints = metrics.plannedPoints;
   sprint.progress      = metrics.progress;
 
-  return await sprint.save();
+  const savedSprint = await sprint.save();
+
+  // Trigger Sprint Started notification to all project members
+  Project.findById(savedSprint.project).then((project) => {
+    if (project) {
+      const performerId = user._id.toString();
+      const recipients = Array.from(
+        new Set([project.owner.toString(), ...project.members.map((m) => m.toString())])
+      ).filter((uid) => uid !== performerId);
+
+      if (recipients.length > 0) {
+        const payloads = recipients.map((uid) => ({
+          userId: uid,
+          type: 'sprint_started' as const,
+          title: 'Sprint Started',
+          message: `${user.name} started the sprint "${savedSprint.name}" for project "${project.name}"`,
+          entityType: 'sprint' as const,
+          entityId: savedSprint._id.toString(),
+          createdBy: performerId,
+        }));
+        bulkCreateNotification(payloads).catch(console.error);
+      }
+    }
+  }).catch(console.error);
+
+  return savedSprint;
 };
 
 /**
@@ -246,7 +272,32 @@ export const endSprint = async (id: string, retrospective: string | undefined, u
 
   if (retrospective) sprint.retrospective = retrospective;
 
-  return await sprint.save();
+  const savedSprint = await sprint.save();
+
+  // Trigger Sprint Completed notification to all project members
+  Project.findById(savedSprint.project).then((project) => {
+    if (project) {
+      const performerId = user._id.toString();
+      const recipients = Array.from(
+        new Set([project.owner.toString(), ...project.members.map((m) => m.toString())])
+      ).filter((uid) => uid !== performerId);
+
+      if (recipients.length > 0) {
+        const payloads = recipients.map((uid) => ({
+          userId: uid,
+          type: 'sprint_completed' as const,
+          title: 'Sprint Completed',
+          message: `${user.name} completed the sprint "${savedSprint.name}" for project "${project.name}"`,
+          entityType: 'sprint' as const,
+          entityId: savedSprint._id.toString(),
+          createdBy: performerId,
+        }));
+        bulkCreateNotification(payloads).catch(console.error);
+      }
+    }
+  }).catch(console.error);
+
+  return savedSprint;
 };
 
 /**

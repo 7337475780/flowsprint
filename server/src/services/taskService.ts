@@ -7,6 +7,8 @@ import {
   NotFoundError, 
   UnauthorizedError 
 } from '../utils/errors.js';
+import { createNotification } from '../modules/notifications/notification.service.js';
+import { parseMentions } from '../utils/mentionHelper.js';
 
 /**
  * Assures a user has access to a project's tasks (Admin, Manager, or assigned Member/Owner).
@@ -79,6 +81,48 @@ export const createTask = async (
       details: `Task assigned directly to teammate`,
     } as any);
     await savedTask.save();
+
+    // Trigger Notification for Assignment
+    const assigneeId = savedTask.assignee.toString();
+    const creatorId = user._id.toString();
+    if (assigneeId !== creatorId) {
+      createNotification({
+        userId: assigneeId,
+        type: 'task_assigned',
+        title: 'New Task Assigned',
+        message: `${user.name} assigned you the task: "${savedTask.title}"`,
+        entityType: 'task',
+        entityId: savedTask._id.toString(),
+        priority: savedTask.priority || 'medium',
+        createdBy: creatorId,
+      }).catch(console.error);
+    }
+  }
+
+  // Parse mentions in the description
+  if (savedTask.description) {
+    parseMentions(savedTask.description).then(async (mentions) => {
+      const creatorId = user._id.toString();
+      const filterMentions = mentions.filter(
+        (uid) => uid !== creatorId && uid !== savedTask.assignee?.toString()
+      );
+      if (filterMentions.length > 0) {
+        await Promise.all(
+          filterMentions.map((uid) =>
+            createNotification({
+              userId: uid,
+              type: 'mention',
+              title: 'Mentioned in Task Description',
+              message: `${user.name} mentioned you in the description of: "${savedTask.title}"`,
+              entityType: 'task',
+              entityId: savedTask._id.toString(),
+              priority: savedTask.priority || 'medium',
+              createdBy: creatorId,
+            })
+          )
+        );
+      }
+    }).catch(console.error);
   }
 
   return savedTask;
@@ -252,7 +296,68 @@ export const updateTask = async (
     } as any);
   }
 
-  return await task.save();
+  const savedTask = await task.save();
+  const creatorId = user._id.toString();
+
+  // Trigger assignment notification if assignee changed
+  if (isAssigneeChanged && savedTask.assignee) {
+    const assigneeId = savedTask.assignee.toString();
+    if (assigneeId !== creatorId) {
+      createNotification({
+        userId: assigneeId,
+        type: 'task_assigned',
+        title: 'Task Assigned',
+        message: `${user.name} assigned you the task: "${savedTask.title}"`,
+        entityType: 'task',
+        entityId: savedTask._id.toString(),
+        priority: savedTask.priority || 'medium',
+        createdBy: creatorId,
+      }).catch(console.error);
+    }
+  } 
+  // Trigger task updated notification for assignee if someone else modified it
+  else if (savedTask.assignee) {
+    const assigneeId = savedTask.assignee.toString();
+    if (assigneeId !== creatorId) {
+      createNotification({
+        userId: assigneeId,
+        type: 'task_updated',
+        title: 'Task Updated',
+        message: `${user.name} updated the task: "${savedTask.title}"`,
+        entityType: 'task',
+        entityId: savedTask._id.toString(),
+        priority: savedTask.priority || 'medium',
+        createdBy: creatorId,
+      }).catch(console.error);
+    }
+  }
+
+  // Parse mentions in the description
+  if (updateData.description) {
+    parseMentions(updateData.description).then(async (mentions) => {
+      const filterMentions = mentions.filter(
+        (uid) => uid !== creatorId && uid !== savedTask.assignee?.toString()
+      );
+      if (filterMentions.length > 0) {
+        await Promise.all(
+          filterMentions.map((uid) =>
+            createNotification({
+              userId: uid,
+              type: 'mention',
+              title: 'Mentioned in Task Description',
+              message: `${user.name} mentioned you in the description of: "${savedTask.title}"`,
+              entityType: 'task',
+              entityId: savedTask._id.toString(),
+              priority: savedTask.priority || 'medium',
+              createdBy: creatorId,
+            })
+          )
+        );
+      }
+    }).catch(console.error);
+  }
+
+  return savedTask;
 };
 
 /**
@@ -340,7 +445,27 @@ export const moveTask = async (
     details: `Task status changed from [${oldStatus}] to [${newStatus}]`,
   } as any);
 
-  return await task.save();
+  const savedTask = await task.save();
+  const performerId = user._id.toString();
+
+  // Trigger task moved notification for assignee if someone else moved it
+  if (savedTask.assignee) {
+    const assigneeId = savedTask.assignee.toString();
+    if (assigneeId !== performerId) {
+      createNotification({
+        userId: assigneeId,
+        type: 'task_moved',
+        title: 'Task Status Changed',
+        message: `${user.name} moved task "${savedTask.title}" to "${newStatus}"`,
+        entityType: 'task',
+        entityId: savedTask._id.toString(),
+        priority: savedTask.priority || 'medium',
+        createdBy: performerId,
+      }).catch(console.error);
+    }
+  }
+
+  return savedTask;
 };
 
 /**
@@ -430,7 +555,27 @@ export const reorderTasks = async (
     } as any);
   }
 
-  return await task.save();
+  const savedTask = await task.save();
+  const performerId = user._id.toString();
+
+  // Trigger task moved notification for assignee if moved across status columns by someone else
+  if (sourceStatus !== destinationStatus && savedTask.assignee) {
+    const assigneeId = savedTask.assignee.toString();
+    if (assigneeId !== performerId) {
+      createNotification({
+        userId: assigneeId,
+        type: 'task_moved',
+        title: 'Task Status Changed',
+        message: `${user.name} moved task "${savedTask.title}" to "${destinationStatus}"`,
+        entityType: 'task',
+        entityId: savedTask._id.toString(),
+        priority: savedTask.priority || 'medium',
+        createdBy: performerId,
+      }).catch(console.error);
+    }
+  }
+
+  return savedTask;
 };
 
 /**
@@ -464,6 +609,48 @@ export const addComment = async (
   } as any);
 
   const saved = await task.save();
+
+  // Trigger Notifications: Mentions + Comment Added
+  const commenterId = user._id.toString();
+  parseMentions(text).then(async (mentions) => {
+    const filterMentions = mentions.filter((uid) => uid !== commenterId);
+    
+    // 1. Dispatch mention notifications
+    if (filterMentions.length > 0) {
+      await Promise.all(
+        filterMentions.map((uid) =>
+          createNotification({
+            userId: uid,
+            type: 'mention',
+            title: 'Mentioned in Task Comment',
+            message: `${user.name} mentioned you in a comment on task: "${saved.title}"`,
+            entityType: 'comment',
+            entityId: saved._id.toString(),
+            priority: saved.priority || 'medium',
+            createdBy: commenterId,
+          })
+        )
+      );
+    }
+
+    // 2. Dispatch comment_added notification to task assignee (if assignee is not the commenter and was not already mentioned)
+    if (saved.assignee) {
+      const assigneeId = saved.assignee.toString();
+      if (assigneeId !== commenterId && !filterMentions.includes(assigneeId)) {
+        await createNotification({
+          userId: assigneeId,
+          type: 'comment_added',
+          title: 'New Task Comment',
+          message: `${user.name} commented on your task: "${saved.title}"`,
+          entityType: 'comment',
+          entityId: saved._id.toString(),
+          priority: saved.priority || 'medium',
+          createdBy: commenterId,
+        });
+      }
+    }
+  }).catch(console.error);
+
   return await saved.populate('comments.author', 'name email avatar');
 };
 

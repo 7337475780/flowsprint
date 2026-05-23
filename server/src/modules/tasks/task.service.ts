@@ -354,9 +354,9 @@ export const reorderTasks = async (
 
     task.activities.push({
       action: 'moved',
-      performedBy: user._id,
+      performedBy: user._id as any,
       details: `Moved task drag reordered to "${targetStatus}" at rank ${targetPosition}`,
-    });
+    } as any);
   }
 
   const saved = await task.save();
@@ -383,9 +383,9 @@ export const addComment = async (id: string, text: string, user: IUser): Promise
 
   task.activities.push({
     action: 'commented',
-    performedBy: user._id,
+    performedBy: user._id as any,
     details: `Added comment to discussion thread`,
-  });
+  } as any);
 
   const saved = await task.save();
   return (await saved.populate('comments.author', 'name email avatar')).populate('assignee', 'name email avatar');
@@ -416,9 +416,9 @@ export const toggleSubtask = async (
 
   task.activities.push({
     action: 'updated',
-    performedBy: user._id,
+    performedBy: user._id as any,
     details: `Marked subtask "${subtask.title}" as ${completed ? 'complete' : 'incomplete'}`,
-  });
+  } as any);
 
   const saved = await task.save();
   return (await saved.populate('assignee', 'name email avatar')).populate('reporter', 'name email avatar');

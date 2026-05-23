@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Menu, Sun, Moon, Bell, ChevronDown, LogOut, User } from 'lucide-react';
+import { Menu, Sun, Moon, ChevronDown, LogOut, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUIStore } from '../../store/useUIStore.js';
 import { useAuthStore } from '../../store/authStore.js';
 import { cn } from '../../lib/utils.js';
+import NotificationBell from '../../features/notifications/components/NotificationBell.js';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -81,14 +82,8 @@ export default function Navbar() {
           {theme === 'dark' ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
         </button>
 
-        {/* Notification bell — placeholder */}
-        <button
-          className="relative p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Notifications"
-        >
-          <Bell className="h-4.5 w-4.5" />
-          <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
-        </button>
+        {/* Notification bell */}
+        <NotificationBell />
 
         {/* Profile dropdown */}
         <div className="relative ml-1" ref={menuRef}>
