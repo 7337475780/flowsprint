@@ -3,62 +3,45 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
-import { rateLimit } from 'express-rate-limit';
 
-import { env } from './config/env.js';
-import apiRouter from './routes/index.js';
-import { notFoundHandler } from './middleware/notFound.js';
-import { errorHandler } from './middleware/error.js';
+import healthRoutes from './routes/healthRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import { errorMiddleware } from './middleware/errorMiddleware.js';
 
 const app = express();
 
-// 1. Security Headers
+// 1. Security & Core Middleware
 app.use(helmet());
-
-// 2. CORS setup
 app.use(
   cors({
-    origin: env.CORS_ORIGIN === '*' ? true : env.CORS_ORIGIN.split(','),
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
-// 3. Request Logging
-if (env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-} else {
-  app.use(morgan('combined'));
-}
+// 2. Request Logging
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// 4. Request Parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// 3. Request Parsing
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// 5. API Rate Limiting
-const limiter = rateLimit({
-  windowMs: env.RATE_LIMIT_WINDOW_MS,
-  max: env.RATE_LIMIT_MAX,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
+// 4. API Routes Mounting
+app.use('/api/health', healthRoutes);
+app.use('/api/auth', authRoutes);
+
+// 5. 404 Catch-All Fallback
+app.use((req, res) => {
+  res.status(404).json({
     success: false,
-    message: 'Too many requests from this IP, please try again after 15 minutes.',
-  },
+    message: `Endpoint not found: ${req.method} ${req.originalUrl}`,
+  });
 });
 
-// Apply rate limiter to all API endpoints
-app.use('/api', limiter);
-
-// 6. Router Mounting
-app.use('/api/v1', apiRouter);
-
-// 7. Route Fallback (404)
-app.use(notFoundHandler);
-
-// 8. Global Error Boundary
-app.use(errorHandler);
+// 6. Centralized Global Error Handler
+app.use(errorMiddleware);
 
 export default app;
