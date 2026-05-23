@@ -7,6 +7,9 @@ import {
   deleteTask,
   moveTask,
   reorderTasks,
+  addComment,
+  editComment,
+  deleteComment,
 } from '../controllers/taskController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import {
@@ -61,6 +64,27 @@ router.patch('/reorder', reorderTasks);
  * @access  Private (Owner/Manager/Assignee only)
  */
 router.patch('/:id/move', taskIdValidator, moveTask);
+
+/**
+ * @route   POST /api/tasks/:id/comments
+ * @desc    Add a comment to the task discussion thread
+ * @access  Private
+ */
+router.post('/:id/comments', taskIdValidator, addComment);
+
+/**
+ * @route   PUT /api/tasks/:id/comments/:commentId
+ * @desc    Modify an existing task comment
+ * @access  Private (Comment author only)
+ */
+router.put('/:id/comments/:commentId', taskIdValidator, editComment);
+
+/**
+ * @route   DELETE /api/tasks/:id/comments/:commentId
+ * @desc    Delete a comment from the discussion thread
+ * @access  Private (Comment author/Project owner/Admin only)
+ */
+router.delete('/:id/comments/:commentId', taskIdValidator, deleteComment);
 
 /**
  * @route   DELETE /api/tasks/:id

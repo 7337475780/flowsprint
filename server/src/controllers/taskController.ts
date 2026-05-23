@@ -146,3 +146,77 @@ export const reorderTasks = asyncHandler(async (req: AuthenticatedRequest, res: 
 
   return sendSuccess(res, 'Tasks reordered successfully', task, 200);
 });
+
+/**
+ * @route   POST /api/tasks/:id/comments
+ * @desc    Add a comment to the task discussion thread
+ * @access  Private
+ */
+export const addComment = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const user = req.user;
+  if (!user) {
+    res.status(401).json({ success: false, message: 'Unauthorized' });
+    return;
+  }
+
+  const { id } = req.params;
+  const { text } = req.body;
+
+  if (!text || !text.trim()) {
+    res.status(400).json({
+      success: false,
+      message: 'Comment text is required in the request body.',
+    });
+    return;
+  }
+
+  const task = await taskService.addComment(id, text, user);
+
+  return sendSuccess(res, 'Comment added successfully', task, 201);
+});
+
+/**
+ * @route   PUT /api/tasks/:id/comments/:commentId
+ * @desc    Edit an existing comment
+ * @access  Private (Comment author only)
+ */
+export const editComment = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const user = req.user;
+  if (!user) {
+    res.status(401).json({ success: false, message: 'Unauthorized' });
+    return;
+  }
+
+  const { id, commentId } = req.params;
+  const { text } = req.body;
+
+  if (!text || !text.trim()) {
+    res.status(400).json({
+      success: false,
+      message: 'Comment text is required in the request body.',
+    });
+    return;
+  }
+
+  const task = await taskService.editComment(id, commentId, text, user);
+
+  return sendSuccess(res, 'Comment updated successfully', task, 200);
+});
+
+/**
+ * @route   DELETE /api/tasks/:id/comments/:commentId
+ * @desc    Delete a comment from the discussion thread
+ * @access  Private (Comment author/Project owner/Admin only)
+ */
+export const deleteComment = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const user = req.user;
+  if (!user) {
+    res.status(401).json({ success: false, message: 'Unauthorized' });
+    return;
+  }
+
+  const { id, commentId } = req.params;
+  const task = await taskService.deleteComment(id, commentId, user);
+
+  return sendSuccess(res, 'Comment deleted successfully', task, 200);
+});
