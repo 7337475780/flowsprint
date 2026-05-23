@@ -19,35 +19,37 @@ const wrap = (el: React.ReactNode) => (
   <Suspense fallback={<Loader fullscreen />}>{el}</Suspense>
 );
 
-export const router = createBrowserRouter([
-  // ─── Public auth routes ───────────────────────────────────────────────
-  {
-    path: '/login',
-    element: wrap(<LoginPage />),
-  },
-  {
-    path: '/register',
-    element: wrap(<RegisterPage />),
-  },
+export const router = createBrowserRouter(
+  [
+    // ─── Public auth routes ───────────────────────────────────────────────
+    {
+      path: '/login',
+      element: wrap(<LoginPage />),
+    },
+    {
+      path: '/register',
+      element: wrap(<RegisterPage />),
+    },
 
-  // ─── Protected workspace ─────────────────────────────────────────────
-  {
-    element: (
-      <ProtectedRoute>
-        <DashboardLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      { path: '/',          element: wrap(<DashboardPage />) },
-      { path: '/dashboard', element: wrap(<DashboardPage />) },
-      { path: '/projects',  element: wrap(<ProjectsPage />) },
-      { path: '/tasks',     element: wrap(<TasksPage />) },
-      { path: '/sprints',   element: wrap(<SprintsPage />) },
-      { path: '/team',      element: wrap(<TeamPage />) },
-      { path: '/settings',  element: wrap(<SettingsPage />) },
-    ],
-  },
+    // ─── Protected workspace ─────────────────────────────────────────────
+    {
+      element: (
+        <ProtectedRoute>
+          <DashboardLayout />
+        </ProtectedRoute>
+      ),
+      children: [
+        { path: '/',          element: wrap(<DashboardPage />) },
+        { path: '/dashboard', element: wrap(<DashboardPage />) },
+        { path: '/projects',  element: wrap(<ProjectsPage />) },
+        { path: '/tasks',     element: wrap(<TasksPage />) },
+        { path: '/sprints',   element: wrap(<SprintsPage />) },
+        { path: '/team',      element: wrap(<TeamPage />) },
+        { path: '/settings',  element: wrap(<SettingsPage />) },
+      ],
+    },
 
-  // ─── 404 fallback ────────────────────────────────────────────────────
-  { path: '*', element: <NotFoundPage /> },
-]);
+    // ─── 404 fallback ────────────────────────────────────────────────────
+    { path: '*', element: <NotFoundPage /> },
+  ]
+);
