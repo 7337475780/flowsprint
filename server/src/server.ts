@@ -8,8 +8,10 @@ dns.setServers(['8.8.8.8', '1.1.1.1']);
 // 1. Initialize environment configuration first
 dotenv.config();
 
+import http from 'http';
 import app from './app.js';
 import { connectDatabase } from './config/db.js';
+import { initSocket } from './sockets/index.js';
 
 const PORT = process.env.PORT || 5000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
@@ -20,8 +22,11 @@ const startServer = async () => {
   // 2. Connect Database
   await connectDatabase();
 
-  // 3. Start Express Listener
-  const server = app.listen(PORT, () => {
+  // 3. Start HTTP server with Socket.io initialized
+  const httpServer = http.createServer(app);
+  initSocket(httpServer);
+
+  const server = httpServer.listen(PORT, () => {
     console.log(`🔥 Server booted in [${NODE_ENV}] mode on port: ${PORT}`);
     console.log(`🔗 Health indicator at: http://localhost:${PORT}/api/health`);
     console.log(`🔗 API auth scope at: http://localhost:${PORT}/api/auth`);

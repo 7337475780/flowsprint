@@ -130,6 +130,29 @@ export function useUpdateTaskStatusMutation(id: string) {
 }
 
 /**
+ * Hook to quick-shift status columns using taskId in payload.
+ */
+export function useUpdateTaskStatusGeneralMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) => updateTaskStatus(id, status),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['tasks-paginated'] });
+      queryClient.invalidateQueries({ queryKey: ['tasks-stats-overview'] });
+      queryClient.invalidateQueries({ queryKey: ['task-details', data._id] });
+      queryClient.invalidateQueries({ queryKey: ['sprints'] });
+      queryClient.invalidateQueries({ queryKey: ['sprint-details'] });
+      toast.success(`Task transitioned to "${data.status}"`);
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || 'Failed to transition task';
+      toast.error(msg);
+    },
+  });
+}
+
+/**
  * Hook to reorder task ranks (used during Drag & Drop).
  */
 export function useReorderTasksMutation() {

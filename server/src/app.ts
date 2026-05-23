@@ -8,7 +8,7 @@ import healthRoutes from './routes/healthRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './modules/projects/project.routes.js';
 import taskRoutes from './modules/tasks/task.routes.js';
-import sprintRoutes from './routes/sprintRoutes.js';
+import sprintRoutes from './modules/sprints/sprint.routes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
 
