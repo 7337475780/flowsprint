@@ -1,10 +1,13 @@
 {
   "name": "flowsprint-server",
   "version": "1.0.0",
+  "type": "module",
   "description": "Express backend for FlowSprint, built with TypeScript",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "nodemon src/server.ts",
+    "dev": "concurrently -n \"tsc,nodemon\" -c \"blue,green\" \"tsc -w\" \"nodemon --delay 1 dist/server.js\"",
+    "build:watch": "tsc -w",
+    "start:watch": "nodemon dist/server.js",
     "build": "rimraf dist && tsc",
     "start": "node dist/server.js",
     "lint": "echo \"No lint script defined in server package yet\""
@@ -31,6 +34,7 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.12.7",
+    "concurrently": "^8.2.2",
     "nodemon": "^3.1.0",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
