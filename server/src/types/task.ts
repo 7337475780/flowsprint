@@ -30,6 +30,8 @@ export interface ITask extends Document {
   slug: string;
   description?: string;
   project: Schema.Types.ObjectId;
+  projectId?: Schema.Types.ObjectId;
+  sprintId?: Schema.Types.ObjectId;
   assignee?: Schema.Types.ObjectId;
   reporter: Schema.Types.ObjectId;
   status: 'backlog' | 'todo' | 'in-progress' | 'review' | 'done';
@@ -38,10 +40,14 @@ export interface ITask extends Document {
   dueDate?: Date;
   estimatedHours?: number;
   actualHours?: number;
+  spentHours?: number;
   storyPoints?: number;
   order: number;
+  position: number;
   attachments: string[];
   isArchived: boolean;
+  archived: boolean;
+  subtasks: { _id?: string; title: string; completed: boolean; }[];
   comments: IComment[];
   activities: IActivity[];
   createdAt: Date;

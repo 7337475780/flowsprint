@@ -43,7 +43,25 @@ const activitySchema = new Schema(
   }
 );
 
-// 3. Define Mongoose Task Schema
+// 3. Embedded Subtask Schema
+const subtaskSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: [true, 'Subtask title is required'],
+      trim: true,
+    },
+    completed: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// 4. Define Mongoose Task Schema
 const taskSchema = new Schema<ITask, TaskModel>(
   {
     title: {
@@ -65,6 +83,14 @@ const taskSchema = new Schema<ITask, TaskModel>(
       type: Schema.Types.ObjectId,
       ref: 'Project',
       required: [true, 'Project reference is required'],
+    },
+    projectId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Project',
+    },
+    sprintId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Sprint',
     },
     assignee: {
       type: Schema.Types.ObjectId,
@@ -108,12 +134,22 @@ const taskSchema = new Schema<ITask, TaskModel>(
       type: Number,
       min: 0,
     },
+    spentHours: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
     storyPoints: {
       type: Number,
       min: [0, 'Story points cannot be negative'],
       default: 0,
     },
     order: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    position: {
       type: Number,
       required: true,
       default: 0,
@@ -128,6 +164,11 @@ const taskSchema = new Schema<ITask, TaskModel>(
       type: Boolean,
       default: false,
     },
+    archived: {
+      type: Boolean,
+      default: false,
+    },
+    subtasks: [subtaskSchema],
     comments: [commentSchema],
     activities: [activitySchema],
   },
@@ -136,7 +177,30 @@ const taskSchema = new Schema<ITask, TaskModel>(
   }
 );
 
-// 4. Pre-Save Slugify Hook
+// 5. Pre-Save Compatibility Hook
+taskSchema.pre('save', function (next) {
+  if (this.projectId && !this.project) {
+    this.project = this.projectId;
+  } else if (this.project && !this.projectId) {
+    this.projectId = this.project;
+  }
+
+  if (this.archived !== undefined) {
+    this.isArchived = this.archived;
+  } else if (this.isArchived !== undefined) {
+    this.archived = this.isArchived;
+  }
+
+  if (this.position !== undefined) {
+    this.order = this.position;
+  } else if (this.order !== undefined) {
+    this.position = this.order;
+  }
+
+  next();
+});
+
+// 6. Pre-Save Slugify Hook
 taskSchema.pre('save', async function (next) {
   // Only trigger if title is new or modified
   if (!this.isModified('title')) {
@@ -167,5 +231,5 @@ taskSchema.pre('save', async function (next) {
   }
 });
 
-// 5. Export Task Model
+// 7. Export Task Model
 export const Task = model<ITask, TaskModel>('Task', taskSchema);

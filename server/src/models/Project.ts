@@ -13,6 +13,7 @@ const projectSchema = new Schema<IProject, ProjectModel>(
       type: String,
       required: [true, 'Project short key is required'],
       uppercase: true,
+      unique: true,
       trim: true,
     },
     slug: {
@@ -112,5 +113,8 @@ projectSchema.pre('save', async function (next) {
   }
 });
 
-// 3. Export Project Model
+// 3. Define text indexes for text searches
+projectSchema.index({ name: 'text', key: 'text', tags: 'text' });
+
+// 4. Export Project Model
 export const Project = model<IProject, ProjectModel>('Project', projectSchema);

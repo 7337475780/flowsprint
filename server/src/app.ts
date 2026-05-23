@@ -6,8 +6,8 @@ import cookieParser from 'cookie-parser';
 
 import healthRoutes from './routes/healthRoutes.js';
 import authRoutes from './routes/authRoutes.js';
-import projectRoutes from './routes/projectRoutes.js';
-import taskRoutes from './routes/taskRoutes.js';
+import projectRoutes from './modules/projects/project.routes.js';
+import taskRoutes from './modules/tasks/task.routes.js';
 import sprintRoutes from './routes/sprintRoutes.js';
 import analyticsRoutes from './routes/analyticsRoutes.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
