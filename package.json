@@ -1,0 +1,24 @@
+{
+  "name": "flowsprint-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FlowSprint - A collaborative project management SaaS",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently -n \"server,client\" -c \"bgBlue.bold,bgMagenta.bold\" \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:client": "npm run dev --workspace=client",
+    "build": "npm run build --workspace=server && npm run build --workspace=client",
+    "build:server": "npm run build --workspace=server",
+    "build:client": "npm run build --workspace=client",
+    "lint": "npm run lint --workspaces",
+    "clean": "rimraf node_modules client/node_modules server/node_modules client/dist server/dist"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "rimraf": "^5.0.5"
+  }
+}
