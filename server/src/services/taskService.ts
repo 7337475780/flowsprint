@@ -63,7 +63,7 @@ export const createTask = async (
     activities: [
       {
         action: 'created',
-        performedBy: user._id,
+        performedBy: user._id as any,
         details: 'Task initialized in backlog',
       },
     ],
@@ -75,9 +75,9 @@ export const createTask = async (
   if (savedTask.assignee) {
     savedTask.activities.push({
       action: 'assigned',
-      performedBy: user._id,
+      performedBy: user._id as any,
       details: `Task assigned directly to teammate`,
-    });
+    } as any);
     await savedTask.save();
   }
 
@@ -183,7 +183,7 @@ export const getTaskById = async (id: string, user: IUser): Promise<ITask> => {
   }
 
   // Verify that member has access to this parent project
-  await checkProjectAccess(task.project._id.toString(), user);
+  await checkProjectAccess(task.project.toString(), user);
 
   return task;
 };
@@ -238,18 +238,18 @@ export const updateTask = async (
   // Track updates in activity logs
   task.activities.push({
     action: 'updated',
-    performedBy: user._id,
+    performedBy: user._id as any,
     details: 'Task details updated',
-  });
+  } as any);
 
   if (isAssigneeChanged) {
     task.activities.push({
       action: 'assigned',
-      performedBy: user._id,
+      performedBy: user._id as any,
       details: task.assignee 
         ? 'Task reassigned to teammate'
         : 'Task unassigned',
-    });
+    } as any);
   }
 
   return await task.save();
@@ -336,9 +336,9 @@ export const moveTask = async (
 
   task.activities.push({
     action: 'moved',
-    performedBy: user._id,
+    performedBy: user._id as any,
     details: `Task status changed from [${oldStatus}] to [${newStatus}]`,
-  });
+  } as any);
 
   return await task.save();
 };
@@ -425,10 +425,124 @@ export const reorderTasks = async (
 
     task.activities.push({
       action: 'moved',
-      performedBy: user._id,
+      performedBy: user._id as any,
       details: `Task status changed from [${sourceStatus}] to [${destinationStatus}]`,
-    });
+    } as any);
   }
 
   return await task.save();
+};
+
+/**
+ * Adds an embedded comment context to a task document.
+ */
+export const addComment = async (
+  taskId: string,
+  text: string,
+  user: IUser
+): Promise<ITask> => {
+  const task = await Task.findById(taskId);
+  if (!task) {
+    throw new NotFoundError('Task was not found');
+  }
+
+  // Verify access
+  await checkProjectAccess(task.project.toString(), user);
+
+  // Append comment
+  const comment: any = {
+    author: user._id as any,
+    text,
+  };
+  task.comments.push(comment);
+
+  // Log activity
+  task.activities.push({
+    action: 'commented',
+    performedBy: user._id as any,
+    details: 'Added a comment to the task thread',
+  } as any);
+
+  const saved = await task.save();
+  return await saved.populate('comments.author', 'name email avatar');
+};
+
+/**
+ * Modifies an existing embedded comment in a task document.
+ */
+export const editComment = async (
+  taskId: string,
+  commentId: string,
+  text: string,
+  user: IUser
+): Promise<ITask> => {
+  const task = await Task.findById(taskId);
+  if (!task) {
+    throw new NotFoundError('Task was not found');
+  }
+
+  const comment = (task.comments as any).id(commentId);
+  if (!comment) {
+    throw new NotFoundError('Comment was not found');
+  }
+
+  // Restrict editing: only comment author can modify
+  if (comment.author.toString() !== user._id.toString()) {
+    throw new UnauthorizedError('Access denied. You can only edit your own comments.');
+  }
+
+  comment.text = text;
+
+  // Log activity
+  task.activities.push({
+    action: 'updated',
+    performedBy: user._id as any,
+    details: 'Modified a task comment',
+  } as any);
+
+  const saved = await task.save();
+  return await saved.populate('comments.author', 'name email avatar');
+};
+
+/**
+ * Removes an embedded comment from a task document.
+ */
+export const deleteComment = async (
+  taskId: string,
+  commentId: string,
+  user: IUser
+): Promise<ITask> => {
+  const task = await Task.findById(taskId).populate('project', 'owner');
+  if (!task) {
+    throw new NotFoundError('Task was not found');
+  }
+
+  const comment = (task.comments as any).id(commentId);
+  if (!comment) {
+    throw new NotFoundError('Comment was not found');
+  }
+
+  const projectOwner = (task.project as any).owner.toString();
+  const isProjectOwner = projectOwner === user._id.toString();
+
+  // Restrict deletion: only comment author, project owner, or admin can delete comments
+  const isAuthor = comment.author.toString() === user._id.toString();
+  const canDelete = isAuthor || isProjectOwner || user.role === 'admin';
+
+  if (!canDelete) {
+    throw new UnauthorizedError('Access denied. You do not have permission to delete this comment.');
+  }
+
+  // Pull out of embedded array
+  (task.comments as any).pull(commentId);
+
+  // Log activity
+  task.activities.push({
+    action: 'updated',
+    performedBy: user._id as any,
+    details: 'Removed a task comment',
+  } as any);
+
+  const saved = await task.save();
+  return await saved.populate('comments.author', 'name email avatar');
 };
