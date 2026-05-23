@@ -1,36 +1,53 @@
 import { createBrowserRouter } from 'react-router-dom';
-import AppLayout from '../layouts/AppLayout.js';
-import Dashboard from '../pages/Dashboard.js';
-import Tasks from '../pages/Tasks.js';
-import Settings from '../pages/Settings.js';
-import NotFound from '../pages/NotFound.js';
+import { lazy, Suspense } from 'react';
+import DashboardLayout from '../components/layout/DashboardLayout.js';
+import ProtectedRoute from '../components/common/ProtectedRoute.js';
+import Loader from '../components/common/Loader.js';
+import NotFoundPage from '../pages/NotFoundPage.js';
 
-/**
- * Modern declarative router configuration for FlowSprint.
- * Houses the AppLayout shell as the parent and pages as active sub-outlets.
- */
+// Lazy-load feature pages to keep the initial bundle lean
+const LoginPage    = lazy(() => import('../features/auth/pages/LoginPage.js'));
+const RegisterPage = lazy(() => import('../features/auth/pages/RegisterPage.js'));
+const DashboardPage = lazy(() => import('../pages/DashboardPage.js'));
+const ProjectsPage  = lazy(() => import('../pages/ProjectsPage.js'));
+const TasksPage     = lazy(() => import('../pages/TasksPage.js'));
+const SprintsPage   = lazy(() => import('../pages/SprintsPage.js'));
+const TeamPage      = lazy(() => import('../pages/TeamPage.js'));
+const SettingsPage  = lazy(() => import('../pages/SettingsPage.js'));
+
+const wrap = (el: React.ReactNode) => (
+  <Suspense fallback={<Loader fullscreen />}>{el}</Suspense>
+);
+
 export const router = createBrowserRouter([
+  // ─── Public auth routes ───────────────────────────────────────────────
   {
-    path: '/',
-    element: <AppLayout />,
-    errorElement: <NotFound />, // React Router catch-all error fallback
+    path: '/login',
+    element: wrap(<LoginPage />),
+  },
+  {
+    path: '/register',
+    element: wrap(<RegisterPage />),
+  },
+
+  // ─── Protected workspace ─────────────────────────────────────────────
+  {
+    element: (
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
     children: [
-      {
-        index: true,
-        element: <Dashboard />,
-      },
-      {
-        path: 'tasks',
-        element: <Tasks />,
-      },
-      {
-        path: 'settings',
-        element: <Settings />,
-      },
-      {
-        path: '*',
-        element: <NotFound />,
-      },
+      { path: '/',          element: wrap(<DashboardPage />) },
+      { path: '/dashboard', element: wrap(<DashboardPage />) },
+      { path: '/projects',  element: wrap(<ProjectsPage />) },
+      { path: '/tasks',     element: wrap(<TasksPage />) },
+      { path: '/sprints',   element: wrap(<SprintsPage />) },
+      { path: '/team',      element: wrap(<TeamPage />) },
+      { path: '/settings',  element: wrap(<SettingsPage />) },
     ],
   },
+
+  // ─── 404 fallback ────────────────────────────────────────────────────
+  { path: '*', element: <NotFoundPage /> },
 ]);
