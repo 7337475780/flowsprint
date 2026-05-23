@@ -5,7 +5,7 @@ import {
   getMe,
   logoutUser,
 } from '../controllers/authController.js';
-import { protect } from '../middleware/authMiddleware.js';
+import { protect, authorize } from '../middleware/authMiddleware.js';
 import {
   registerValidator,
   loginValidator,
@@ -33,6 +33,19 @@ router.post('/login', loginValidator, loginUser);
  * @access  Private
  */
 router.get('/me', protect as any, getMe);
+
+/**
+ * @route   GET /api/auth/admin-only
+ * @desc    Workspace admin diagnostic endpoint (Protected & Restricted)
+ * @access  Private (Admin Only)
+ */
+router.get('/admin-only', protect as any, authorize('admin') as any, (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Welcome to the Admin workspace, privileges authorized.',
+    data: {},
+  });
+});
 
 /**
  * @route   POST /api/auth/logout
