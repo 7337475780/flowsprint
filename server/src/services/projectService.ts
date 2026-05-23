@@ -113,10 +113,13 @@ export const getProjectById = async (id: string, user: IUser): Promise<IProject>
   }
 
   // Security gate: Members can only inspect if owner or assigned to team list
+  const ownerId = (project.owner as any)._id?.toString() || project.owner.toString();
+  const memberIds = project.members.map((m: any) => m._id?.toString() || m.toString());
+
   if (
     user.role === 'member' &&
-    project.owner._id.toString() !== user._id.toString() &&
-    !project.members.some((m) => m._id.toString() === user._id.toString())
+    ownerId !== user._id.toString() &&
+    !memberIds.includes(user._id.toString())
   ) {
     throw new UnauthorizedError('Access denied. You are not assigned to this project.');
   }

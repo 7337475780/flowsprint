@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 
 import healthRoutes from './routes/healthRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import projectRoutes from './routes/projectRoutes.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
 
 const app = express();
@@ -32,6 +33,7 @@ app.use(cookieParser());
 // 4. API Routes Mounting
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/projects', projectRoutes);
 
 // 5. 404 Catch-All Fallback
 app.use((req, res) => {
