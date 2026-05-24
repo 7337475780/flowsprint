@@ -8,6 +8,7 @@ import {
   UnauthorizedError, 
   NotFoundError 
 } from '../utils/errors.js';
+import { ensureDefaultWorkspace } from '../modules/workspaces/workspace.service.js';
 
 /**
  * Helper to strip password and return a safe user payload.
@@ -39,6 +40,9 @@ export const registerUser = asyncHandler(async (req: Request, res: Response) => 
     password,
     role: role || 'member', // Default to member role
   });
+
+  // Ensure default workspace is initialized
+  await ensureDefaultWorkspace(user._id.toString(), user.name);
 
   // 3. Generate signed authentication token
   const token = generateToken(user._id.toString(), user.role);
@@ -124,11 +128,17 @@ export const getMe = asyncHandler(async (req: AuthenticatedRequest, res: Respons
     throw new NotFoundError('User profile could not be found');
   }
 
+  // Ensure default workspace is initialized (migrates old users seamlessly!)
+  await ensureDefaultWorkspace(user._id.toString(), user.name);
+
+  // Refetch user to return latest state
+  const updatedUser = await User.findById(user._id);
+
   return res.status(200).json({
     success: true,
     message: 'Active profile retrieved successfully',
     data: {
-      user: formatSafeUser(user),
+      user: formatSafeUser(updatedUser || user),
     },
   });
 });

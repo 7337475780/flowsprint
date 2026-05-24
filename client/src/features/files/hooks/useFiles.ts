@@ -10,6 +10,8 @@ export function useFilesQuery(params: { taskId?: string; projectId?: string }) {
     queryKey: ['files', params],
     queryFn: () => getFiles(params),
     enabled: !!(params.taskId || params.projectId),
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }
 

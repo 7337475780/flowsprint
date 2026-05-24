@@ -3,6 +3,8 @@ import { protect } from '../../middleware/authMiddleware.js';
 import * as fileController from './file.controller.js';
 import { uploadMiddleware } from './file.service.js';
 
+import { uploadLimiter } from '../../middleware/rateLimiter.js';
+
 const router = Router();
 
 // Secure all file API endpoints with JWT auth
@@ -13,7 +15,7 @@ router.use(protect as any);
  * @desc    Upload single or multiple files and attach to tasks or projects
  * @access  Private
  */
-router.post('/upload', uploadMiddleware.any(), fileController.uploadFiles);
+router.post('/upload', uploadLimiter as any, uploadMiddleware.any(), fileController.uploadFiles);
 
 /**
  * @route   GET /api/files

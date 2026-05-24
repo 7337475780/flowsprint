@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Calendar, MessageSquare, CheckSquare, Trash2, Edit } from 'lucide-react';
 import { cn } from '../../../lib/utils.js';
 import type { Task } from '../api/taskApi.js';
@@ -18,7 +19,7 @@ const PRIORITY_BADGES = {
   critical: 'bg-rose-500/10 text-rose-500 border border-rose-500/20',
 };
 
-export default function TaskCard({ task, onEdit, onDelete, onClick, className }: TaskCardProps) {
+const TaskCard = memo(function TaskCard({ task, onEdit, onDelete, onClick, className }: TaskCardProps) {
   const user = useAuthStore((s) => s.user);
 
   const reporterId = typeof task.reporter === 'object' ? task.reporter._id : task.reporter;
@@ -165,4 +166,22 @@ export default function TaskCard({ task, onEdit, onDelete, onClick, className }:
       </div>
     </div>
   );
-}
+}, (prev, next) => {
+  return (
+    prev.task._id === next.task._id &&
+    prev.task.status === next.task.status &&
+    prev.task.position === next.task.position &&
+    prev.task.title === next.task.title &&
+    prev.task.description === next.task.description &&
+    prev.task.priority === next.task.priority &&
+    prev.task.dueDate === next.task.dueDate &&
+    prev.task.assignee?._id === next.task.assignee?._id &&
+    prev.task.assignee?.avatar === next.task.assignee?.avatar &&
+    prev.task.comments?.length === next.task.comments?.length &&
+    prev.task.subtasks?.length === next.task.subtasks?.length &&
+    prev.task.subtasks?.every((sub, i) => sub.completed === next.task.subtasks?.[i]?.completed) &&
+    prev.className === next.className
+  );
+});
+
+export default TaskCard;

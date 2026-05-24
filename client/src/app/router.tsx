@@ -14,6 +14,7 @@ const TasksPage     = lazy(() => import('../pages/TasksPage.js'));
 const SprintsPage   = lazy(() => import('../pages/SprintsPage.js'));
 const TeamPage      = lazy(() => import('../pages/TeamPage.js'));
 const SettingsPage  = lazy(() => import('../pages/SettingsPage.js'));
+const ProfilePage   = lazy(() => import('../pages/ProfilePage.js'));
 const NotificationsPage = lazy(() => import('../pages/NotificationsPage.js'));
 const AnalyticsPage = lazy(() => import('../pages/AnalyticsPage.js'));
 
@@ -48,6 +49,7 @@ export const router = createBrowserRouter(
         { path: '/sprints',   element: wrap(<SprintsPage />) },
         { path: '/team',      element: wrap(<TeamPage />) },
         { path: '/settings',  element: wrap(<SettingsPage />) },
+        { path: '/profile',   element: wrap(<ProfilePage />) },
         { path: '/notifications', element: wrap(<NotificationsPage />) },
         { path: '/analytics', element: wrap(<AnalyticsPage />) },
       ],

@@ -6,6 +6,7 @@ import PageHeader from '../components/common/PageHeader.js';
 import EmptyState from '../components/common/EmptyState.js';
 import { useAuthStore } from '../store/authStore.js';
 import { cn } from '../lib/utils.js';
+import { hasPermission } from '../lib/permissions.js';
 
 // Modular Feature Imports
 import {
@@ -76,7 +77,7 @@ export default function ProjectsPage() {
     },
   });
 
-  const isEditor = user?.role === 'admin' || user?.role === 'manager';
+  const isEditor = hasPermission(user, 'create:project');
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
   const handleOpenCreateModal = () => {

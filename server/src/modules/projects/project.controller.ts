@@ -3,12 +3,17 @@ import { AuthenticatedRequest } from '../../middleware/authMiddleware.js';
 import * as projectService from './project.service.js';
 import { asyncHandler } from '../../utils/asyncHandler.js';
 import { sendSuccess } from '../../utils/response.js';
+import { BadRequestError } from '../../utils/errors.js';
 
 /**
  * Handle POST /api/projects - Create a new project.
  */
 export const createProject = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const project = await projectService.createProject(req.body, req.user!._id.toString());
+  const workspaceId = req.headers['x-workspace-id'] || req.user!.currentWorkspace?.toString();
+  if (!workspaceId) {
+    throw new BadRequestError('Workspace ID context is required');
+  }
+  const project = await projectService.createProject(req.body, req.user!._id.toString(), workspaceId as string);
   return sendSuccess(res, 'Project created successfully', project, 201);
 });
 

@@ -16,6 +16,8 @@ export function useProjects(params?: Record<string, any>) {
   return useQuery({
     queryKey: ['projects', params],
     queryFn: () => getProjects(params),
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }
 
@@ -27,6 +29,8 @@ export function useProjectDetails(id: string) {
     queryKey: ['project', id],
     queryFn: () => getProjectById(id),
     enabled: !!id,
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }
 

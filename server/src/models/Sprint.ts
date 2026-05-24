@@ -111,6 +111,7 @@ sprintSchema.pre('save', function (next) {
 
 // Compounded index on project and status for fast search and aggregation
 sprintSchema.index({ project: 1, status: 1 });
+sprintSchema.index({ owner: 1 });
 
 // Export the Mongoose Sprint Model
 export const Sprint = model<ISprint, SprintModel>('Sprint', sprintSchema);

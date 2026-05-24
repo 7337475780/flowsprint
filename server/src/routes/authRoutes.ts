@@ -11,6 +11,8 @@ import {
   loginValidator,
 } from '../validators/authValidator.js';
 
+import { authLimiter } from '../middleware/rateLimiter.js';
+
 const router = Router();
 
 /**
@@ -25,7 +27,7 @@ router.post('/register', registerValidator, registerUser);
  * @desc    Authenticate user, assign session cookie & returns safe user details
  * @access  Public
  */
-router.post('/login', loginValidator, loginUser);
+router.post('/login', authLimiter as any, loginValidator, loginUser);
 
 /**
  * @route   GET /api/auth/me

@@ -9,6 +9,7 @@ import { Project } from '../../models/Project.js';
 import { IFile } from './file.types.js';
 import { IUser } from '../../types/user.js';
 import { getFileTypeFromMime, sanitizeFileName } from './file.utils.js';
+import { logEvent } from '../audit/audit.service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -69,6 +70,30 @@ export const uploadSingleFile = async (
   user: IUser,
   association: { taskId?: string; projectId?: string; sprintId?: string }
 ): Promise<IFile> => {
+  // Enforce Resource-Level Security Isolation
+  if (association.projectId) {
+    const project = await Project.findById(association.projectId);
+    if (!project) {
+      throw new Error('Project workspace not found');
+    }
+    const activeWorkspaceId = user.currentWorkspace?.toString();
+    if (project.workspaceId && project.workspaceId.toString() !== activeWorkspaceId) {
+      throw new Error('Access denied. Project belongs to a different workspace context.');
+    }
+  } else if (association.taskId) {
+    const task = await Task.findById(association.taskId).populate('project');
+    if (!task) {
+      throw new Error('Task not found');
+    }
+    const project = task.project as any;
+    if (project) {
+      const activeWorkspaceId = user.currentWorkspace?.toString();
+      if (project.workspaceId && project.workspaceId.toString() !== activeWorkspaceId) {
+        throw new Error('Access denied. Task project belongs to a different workspace context.');
+      }
+    }
+  }
+
   const fileType = getFileTypeFromMime(fileData.mimetype, fileData.originalname);
   let fileUrl = '';
   let publicId = '';
@@ -107,6 +132,13 @@ export const uploadSingleFile = async (
       sprintId: association.sprintId || undefined,
       visibility: 'public',
       publicId,
+    });
+
+    // Log auditing trail
+    await logEvent(user._id.toString(), 'FILE_UPLOADED', 'File', newFile._id.toString(), {
+      originalName: newFile.originalName,
+      fileType: newFile.fileType,
+      size: newFile.size,
     });
 
     // 4. Update Parent Attachments Array
@@ -255,4 +287,9 @@ export const deleteFile = async (id: string, user: IUser): Promise<void> => {
 
   // 5. Delete metadata record from database
   await File.findByIdAndDelete(id);
+
+  // Log auditing trail
+  await logEvent(user._id.toString(), 'FILE_DELETED', 'File', file._id.toString(), {
+    originalName: file.originalName,
+  });
 };

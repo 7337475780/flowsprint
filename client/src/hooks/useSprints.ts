@@ -21,6 +21,8 @@ export function useSprints(params?: Record<string, any>) {
   return useQuery({
     queryKey: ['sprints', params],
     queryFn: () => getSprints(params),
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }
 
@@ -32,6 +34,8 @@ export function useSprintDetails(id: string) {
     queryKey: ['sprint', id],
     queryFn: () => getSprintById(id),
     enabled: !!id,
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }
 
@@ -43,6 +47,8 @@ export function useSprintBurndown(id: string) {
     queryKey: ['sprint-burndown', id],
     queryFn: () => getSprintBurndown(id),
     enabled: !!id,
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }
 
@@ -54,6 +60,8 @@ export function useSprintAnalytics(id: string) {
     queryKey: ['sprint-analytics', id],
     queryFn: () => getSprintAnalytics(id),
     enabled: !!id,
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }
 

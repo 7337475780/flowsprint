@@ -18,6 +18,7 @@ export interface IProject extends Document {
   progress: number;
   isArchived: boolean;
   attachments?: string[];
+  workspaceId?: Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }

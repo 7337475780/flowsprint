@@ -231,5 +231,12 @@ taskSchema.pre('save', async function (next) {
   }
 });
 
+// 6.5 Define Indexes for High-Velocity Queries
+taskSchema.index({ project: 1, status: 1 });
+taskSchema.index({ assignee: 1 });
+taskSchema.index({ sprintId: 1 });
+taskSchema.index({ dueDate: 1 });
+taskSchema.index({ createdAt: -1 });
+
 // 7. Export Task Model
 export const Task = model<ITask, TaskModel>('Task', taskSchema);

@@ -37,6 +37,67 @@ const userSchema = new Schema<IUser, UserModel, IUserMethods>(
       type: Boolean,
       default: true,
     },
+    bio: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    preferences: {
+      theme: {
+        type: String,
+        enum: ['light', 'dark'],
+        default: 'dark', // Elite developer startup theme default
+      },
+      emailNotifications: {
+        type: Boolean,
+        default: true,
+      },
+      taskAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      sprintAlerts: {
+        type: Boolean,
+        default: true,
+      },
+      mentionAlerts: {
+        type: Boolean,
+        default: true,
+      },
+    },
+    lastLogin: {
+      type: Date,
+    },
+    activeSessions: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+        device: {
+          type: String,
+          default: 'Unknown Device',
+        },
+        ip: {
+          type: String,
+          default: '127.0.0.1',
+        },
+        lastActive: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+    workspaces: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Workspace',
+      },
+    ],
+    currentWorkspace: {
+      type: Schema.Types.ObjectId,
+      ref: 'Workspace',
+    },
   },
   {
     timestamps: true, // Automatically manages createdAt and updatedAt

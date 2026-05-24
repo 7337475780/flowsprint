@@ -20,6 +20,8 @@ export function useTasks(params?: Record<string, any>) {
   return useQuery({
     queryKey: ['tasks', params],
     queryFn: () => getTasks(params),
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }
 
@@ -31,6 +33,8 @@ export function useTaskDetails(id: string) {
     queryKey: ['task', id],
     queryFn: () => getTaskById(id),
     enabled: !!id,
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }
 

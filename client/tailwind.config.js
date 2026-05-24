@@ -7,6 +7,11 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      spacing: {
+        '4.5': '1.125rem',
+        '5.5': '1.375rem',
+        '6.5': '1.625rem',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -50,6 +55,28 @@ export default {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
         heading: ["Outfit", "sans-serif"],
+      },
+      // ─── Custom micro typography scale ───────────────────────────────
+      // text-4xs (8px), text-3xs (9px), text-2xs (10px) used across 30+ components
+      fontSize: {
+        '4xs': ['0.5rem',    { lineHeight: '0.75rem' }],   // 8px / 12px
+        '3xs': ['0.5625rem', { lineHeight: '0.875rem' }],  // 9px / 14px
+        '2xs': ['0.625rem',  { lineHeight: '1rem' }],      // 10px / 16px
+      },
+      // ─── Custom shadow scale ─────────────────────────────────────────
+      // shadow-xs / shadow-2xs / shadow-3xs used across 20+ components
+      boxShadow: {
+        'xs':  '0 1px 2px 0 rgb(0 0 0 / 0.08)',
+        '2xs': '0 1px 2px 0 rgb(0 0 0 / 0.06)',
+        '3xs': '0 1px 1px 0 rgb(0 0 0 / 0.04)',
+      },
+      // ─── Custom backdrop blur scale ──────────────────────────────────
+      backdropBlur: {
+        'xs': '2px',
+      },
+      // ─── Custom border width (border-l-3 used in TaskCard, KanbanColumn) ──
+      borderWidth: {
+        '3': '3px',
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { cn } from '../../lib/utils.js';
 import MetricBadge from './MetricBadge.js';
 
@@ -13,9 +13,6 @@ interface KpiCardProps {
   className?: string;
 }
 
-/**
- * Premium Stripe/Linear style metric box.
- */
 export default function KpiCard({
   title,
   value,
@@ -26,78 +23,99 @@ export default function KpiCard({
   sparklineData,
   className,
 }: KpiCardProps) {
-  // Programmatic chart points fallback
+  // Safe React unique ID provider to fix HTML space breaks inside gradient definitions
+  const gradientId = useId();
+
   const points = sparklineData || (
-    trend === 'up' 
-      ? [12, 14, 13, 17, 16, 21, 24] 
+    trend === 'up'
+      ? [12, 14, 13, 17, 16, 21, 24]
       : trend === 'down'
-      ? [24, 21, 23, 18, 19, 14, 11]
-      : [15, 14, 16, 15, 17, 16, 17]
+        ? [24, 21, 23, 18, 19, 14, 11]
+        : [15, 14, 16, 15, 17, 16, 17]
   );
 
-  // Programmatic SVG chart coordinates
-  const width = 100;
-  const height = 30;
+  const W = 100, H = 30;
   const max = Math.max(...points);
   const min = Math.min(...points);
   const spread = max - min === 0 ? 1 : max - min;
 
   const path = points
-    .map((val, index) => {
-      const x = (index / (points.length - 1)) * width;
-      const y = height - ((val - min) / spread) * height;
-      return `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    .map((v, i) => {
+      const x = (i / (points.length - 1)) * W;
+      const y = H - ((v - min) / spread) * H;
+      return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
     })
     .join(' ');
 
-  const strokeColor = trend === 'up' ? '#10b981' : trend === 'down' ? '#f43f5e' : '#6366f1';
+  const strokeColor =
+    trend === 'up' ? '#10b981' : trend === 'down' ? '#34d399' : '#059669';
 
   return (
     <div
       className={cn(
-        'group border bg-card rounded-2xl p-5 flex flex-col justify-between shadow-2xs',
-        'hover:shadow-md transition-all duration-300 hover:-translate-y-1 transform relative overflow-hidden',
+        'group relative border bg-card rounded-xl p-5 flex flex-col h-full min-h-[180px] min-w-0 w-full overflow-hidden',
+        'hover:shadow-md transition-all duration-200',
         className
       )}
     >
-      {/* Micro Glow */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-transparent to-primary/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      {/* Subtle hover glow backdrop */}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-transparent to-emerald-500/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-      <div className="flex justify-between items-start">
-        <span className="text-3xs font-extrabold uppercase tracking-widest text-muted-foreground block">
+      {/* ── Row 1: title + icon ── */}
+      <div className="flex items-start justify-between gap-3 w-full min-w-0">
+        <span
+          className={cn(
+            'leading-tight select-none block flex-1 min-w-0 truncate',
+            'text-[11px] font-bold uppercase tracking-[0.08em]',
+            'text-muted-foreground',
+            'hyphens-none break-normal'
+          )}
+          title={title}
+        >
           {title}
         </span>
-        <div className={cn('p-2 rounded-xl border shrink-0', color)}>
-          <Icon className="h-4 w-4 stroke-[2.2]" />
+        <div className={cn('p-1.5 rounded-lg border shrink-0', color)}>
+          <Icon className="h-5 w-5 stroke-[1.8]" />
         </div>
       </div>
 
-      <div className="space-y-1 mt-3.5">
-        <div className="text-2xl font-bold font-heading tracking-tight text-foreground leading-none">
+      {/* ── Row 2: metric value ── */}
+      <div className="mt-4 flex-1 min-w-0 w-full">
+        <div className="text-[26px] font-bold font-heading tracking-tight text-foreground leading-none truncate">
           {value}
         </div>
-        <div className="flex items-center gap-1.5 pt-1.5">
+        <div className="mt-2 flex">
           <MetricBadge change={change} trend={trend} />
         </div>
       </div>
 
-      {/* Sparkline Visualiser */}
-      <div className="mt-5 flex items-end justify-between gap-4">
-        <div className="w-20 h-[30px] shrink-0 opacity-75 group-hover:opacity-100 transition-opacity">
-          <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${width} ${height}`}>
+      {/* ── Row 3: sparkline + label ── FIXED OVERFLOW TRACK SQUEEZING */}
+      <div className="mt-auto pt-4 flex items-end justify-between gap-3 w-full min-w-0">
+
+        {/* Sparkline Container Wrapper Guard */}
+        <div
+          className="flex-1 min-w-0 max-w-[120px] shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"
+          style={{ height: 32 }}
+        >
+          <svg
+            width="100%"
+            height="100%"
+            viewBox={`0 0 ${W} ${H}`}
+            preserveAspectRatio="none"
+            className="overflow-visible"
+          >
             <defs>
-              <linearGradient id={`grad-${title}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={strokeColor} stopOpacity="0.2" />
+              {/* Fixed Space Break Token bug via standard HTML safe useId generation */}
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={strokeColor} stopOpacity="0.25" />
                 <stop offset="100%" stopColor={strokeColor} stopOpacity="0" />
               </linearGradient>
             </defs>
-            {/* Shaded Area */}
             <path
-              d={`${path} L ${width} ${height} L 0 ${height} Z`}
-              fill={`url(#grad-${title})`}
+              d={`${path} L ${W} ${H} L 0 ${H} Z`}
+              fill={`url(#${gradientId})`}
               stroke="none"
             />
-            {/* Chart Line */}
             <path
               d={path}
               fill="none"
@@ -108,8 +126,10 @@ export default function KpiCard({
             />
           </svg>
         </div>
-        <span className="text-3xs font-semibold text-muted-foreground tracking-wider uppercase whitespace-nowrap">
-          7d delta
+
+        {/* Label block indicator element */}
+        <span className="text-[10px] font-bold text-muted-foreground/60 tracking-wider uppercase whitespace-nowrap shrink-0 pb-0.5 select-none">
+          7D Delta
         </span>
       </div>
     </div>

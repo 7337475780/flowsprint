@@ -17,7 +17,7 @@ export default function TaskBoard({ tasks, onEdit, onDelete, onCardClick }: Task
   const doneTasks = tasks.filter((t) => t.status === 'done');
 
   return (
-    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-5 items-start w-full overflow-x-auto pb-4 custom-scrollbar">
+    <div className="flex gap-6 items-start w-full overflow-x-auto pb-4 custom-scrollbar min-h-[600px]">
       {/* 1. Backlog */}
       <TaskColumn
         status="backlog"

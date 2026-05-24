@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Project } from '../../models/Project.js';
 import { Task } from '../../models/Task.js';
 import { Sprint } from '../../models/Sprint.js';
@@ -68,7 +69,7 @@ export const getWorkspaceOverview = async (user: IUser): Promise<DashboardOvervi
     
     // Aggregated Task counts (Total, Done, Overdue)
     Task.aggregate([
-      { $match: { project: { $in: visibleProjectIds.map(id => new Object(id)) }, isArchived: false } },
+      { $match: { project: { $in: visibleProjectIds.map(id => new mongoose.Types.ObjectId(id)) }, isArchived: false } },
       {
         $group: {
           _id: null,
@@ -94,7 +95,7 @@ export const getWorkspaceOverview = async (user: IUser): Promise<DashboardOvervi
 
     // Sprint Velocity Averages
     Sprint.aggregate([
-      { $match: { project: { $in: visibleProjectIds.map(id => new Object(id)) }, status: 'completed' } },
+      { $match: { project: { $in: visibleProjectIds.map(id => new mongoose.Types.ObjectId(id)) }, status: 'completed' } },
       { $group: { _id: null, avgVelocity: { $avg: '$velocity' } } },
     ]),
 
@@ -102,7 +103,7 @@ export const getWorkspaceOverview = async (user: IUser): Promise<DashboardOvervi
     Task.aggregate([
       {
         $match: {
-          project: { $in: visibleProjectIds.map(id => new Object(id)) },
+          project: { $in: visibleProjectIds.map(id => new mongoose.Types.ObjectId(id)) },
           isArchived: false,
           assignee: { $exists: true, $ne: null },
         },
@@ -434,7 +435,7 @@ export const getTeamMetrics = async (user: IUser): Promise<TeamAnalytics> => {
 
   // Multi-aggregation fetches metrics for all matching assignees
   const memberMetrics = await Task.aggregate([
-    { $match: { project: { $in: visibleProjects.map(id => new Object(id)) }, isArchived: false } },
+    { $match: { project: { $in: visibleProjects.map(id => new mongoose.Types.ObjectId(id)) }, isArchived: false } },
     {
       $group: {
         _id: '$assignee',
@@ -460,7 +461,7 @@ export const getTeamMetrics = async (user: IUser): Promise<TeamAnalytics> => {
 
   // Query planned and completed story points per user from Sprints aggregation
   const sprintPointsByUser = await Sprint.aggregate([
-    { $match: { project: { $in: visibleProjects.map(id => new Object(id)) } } },
+    { $match: { project: { $in: visibleProjects.map(id => new mongoose.Types.ObjectId(id)) } } },
     { $unwind: '$tasks' },
     {
       $lookup: {
@@ -561,7 +562,7 @@ export const getTrendMetrics = async (user: IUser): Promise<TrendAnalytics> => {
   const weeklyCompletion = await Task.aggregate([
     {
       $match: {
-        project: { $in: visibleProjects.map(id => new Object(id)) },
+        project: { $in: visibleProjects.map(id => new mongoose.Types.ObjectId(id)) },
         status: 'done',
         updatedAt: { $gte: eightWeeksAgo },
       },
@@ -607,7 +608,7 @@ export const getTrendMetrics = async (user: IUser): Promise<TrendAnalytics> => {
   const monthlyVelocity = await Sprint.aggregate([
     {
       $match: {
-        project: { $in: visibleProjects.map(id => new Object(id)) },
+        project: { $in: visibleProjects.map(id => new mongoose.Types.ObjectId(id)) },
         status: 'completed',
         createdAt: { $gte: sixMonthsAgo },
       },

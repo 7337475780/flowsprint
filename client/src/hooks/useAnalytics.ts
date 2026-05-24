@@ -10,5 +10,7 @@ export function useAnalyticsOverview() {
     queryFn: getAnalyticsOverview,
     // Automatically refetch when the browser tab goes active or gets re-focused
     refetchOnWindowFocus: true,
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }

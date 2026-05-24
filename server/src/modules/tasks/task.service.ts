@@ -8,6 +8,7 @@ import {
   UnauthorizedError,
 } from '../../utils/errors.js';
 import type { PaginatedTasks, TaskStats } from './task.types.js';
+import { logEvent } from '../audit/audit.service.js';
 
 /**
  * Helper to check project membership permissions.
@@ -71,6 +72,13 @@ export const createTask = async (payload: any, user: IUser): Promise<ITask> => {
   });
 
   const saved = await task.save();
+
+  // Log auditing trail
+  await logEvent(user._id.toString(), 'TASK_CREATED', 'Task', saved._id.toString(), {
+    title: saved.title,
+    status: saved.status,
+  });
+
   return (await saved.populate('assignee', 'name email avatar')).populate('reporter', 'name email avatar');
 };
 
@@ -152,12 +160,13 @@ export const getTasks = async (query: any, user: IUser): Promise<PaginatedTasks>
       .populate('project', 'name key')
       .sort(sortOption)
       .skip(skip)
-      .limit(limit),
+      .limit(limit)
+      .lean(),
     Task.countDocuments(dbQuery),
   ]);
 
   return {
-    data: tasks,
+    data: tasks as any as ITask[],
     total,
     page,
     limit,
@@ -281,6 +290,11 @@ export const deleteTask = async (id: string, user: IUser): Promise<void> => {
   }
 
   await Task.findByIdAndDelete(id);
+
+  // Log auditing trail
+  await logEvent(user._id.toString(), 'TASK_DELETED', 'Task', task._id.toString(), {
+    title: task.title,
+  });
 };
 
 /**

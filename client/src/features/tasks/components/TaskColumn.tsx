@@ -71,7 +71,7 @@ export default function TaskColumn({
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       className={cn(
-        'flex flex-col h-full min-h-[550px] rounded-2xl border bg-card/65 backdrop-blur-xs shadow-3xs overflow-hidden transition-all duration-300',
+        'flex flex-col h-full min-h-[550px] w-[280px] md:w-[320px] shrink-0 rounded-2xl border bg-card/65 backdrop-blur-xs shadow-3xs overflow-hidden transition-all duration-300',
         theme.border,
         reorderMutation.isPending && 'opacity-60 cursor-wait'
       )}

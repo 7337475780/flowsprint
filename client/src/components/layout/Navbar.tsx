@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Menu, Sun, Moon, ChevronDown, LogOut, User } from 'lucide-react';
+import { Menu, Sun, Moon, ChevronDown, LogOut, User, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUIStore } from '../../store/useUIStore.js';
 import { useAuthStore } from '../../store/authStore.js';
@@ -9,18 +9,19 @@ import NotificationBell from '../../features/notifications/components/Notificati
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
-  '/projects':  'Projects',
-  '/tasks':     'Tasks',
-  '/sprints':   'Sprints',
-  '/team':      'Team',
-  '/settings':  'Settings',
+  '/projects': 'Projects',
+  '/tasks': 'Tasks',
+  '/sprints': 'Sprints',
+  '/team': 'Team',
+  '/settings': 'Settings',
+  '/profile': 'Profile',
 };
 
 export default function Navbar() {
-  const location   = useLocation();
-  const navigate   = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef    = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const { toggleSidebar, theme, toggleTheme } = useUIStore();
   const { user, logout } = useAuthStore();
@@ -29,10 +30,11 @@ export default function Navbar() {
 
   const initials = (user?.name || 'User')
     .split(' ')
+    .filter(Boolean)
     .map((n) => n[0])
     .slice(0, 2)
     .join('')
-    .toUpperCase();
+    .toUpperCase() || 'U';
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -111,11 +113,18 @@ export default function Navbar() {
           {menuOpen && (
             <div className="absolute right-0 top-full mt-2 w-44 rounded-xl border bg-card shadow-lg py-1.5 z-50">
               <button
-                onClick={() => { navigate('/settings'); setMenuOpen(false); }}
+                onClick={() => { navigate('/profile'); setMenuOpen(false); }}
                 className="flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-secondary transition-colors"
               >
                 <User className="h-4 w-4 text-muted-foreground" />
                 Profile
+              </button>
+              <button
+                onClick={() => { navigate('/settings'); setMenuOpen(false); }}
+                className="flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-secondary transition-colors"
+              >
+                <Settings className="h-4 w-4 text-muted-foreground" />
+                Settings
               </button>
               <div className="my-1 border-t" />
               <button

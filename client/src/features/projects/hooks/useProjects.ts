@@ -16,6 +16,8 @@ export function useProjectsQuery(params?: Record<string, any>) {
   return useQuery({
     queryKey: ['projects-paginated', params],
     queryFn: () => getProjects(params),
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }
 
@@ -27,6 +29,8 @@ export function useProjectDetailsQuery(id: string) {
     queryKey: ['project-details', id],
     queryFn: () => getProjectById(id),
     enabled: !!id,
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }
 
@@ -37,6 +41,8 @@ export function useProjectStatsQuery() {
   return useQuery({
     queryKey: ['projects-stats-overview'],
     queryFn: getProjectStats,
+    staleTime: 60000,
+    gcTime: 300000,
   });
 }
 

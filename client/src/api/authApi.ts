@@ -28,6 +28,24 @@ export interface User {
   role:     'admin' | 'manager' | 'member';
   avatar?:  string;
   isActive: boolean;
+  bio?:     string;
+  preferences?: {
+    theme: 'light' | 'dark';
+    emailNotifications: boolean;
+    taskAlerts: boolean;
+    sprintAlerts: boolean;
+    mentionAlerts: boolean;
+  };
+  lastLogin?: string;
+  activeSessions?: Array<{
+    _id: string;
+    token: string;
+    device: string;
+    ip: string;
+    lastActive: string;
+  }>;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /**

@@ -40,27 +40,27 @@ export default function DashboardPage() {
 
   // 2. Data aggregation & fallbacks
   const completedSprintsCount = sprintData?.sprints?.filter((s) => s.status === 'completed').length ?? 2;
-  
+
   const activeTasksCount = tasksData?.tasks?.filter(
     (t) => t.status === 'in-progress' || t.status === 'todo' || t.status === 'review'
   ).length ?? 34;
 
   const totalProjects = projectData?.total ?? 4;
-  
+
   // Aggregate all unique team members from active projects
-  const teamMembersCount = projectData?.projects 
+  const teamMembersCount = projectData?.projects
     ? Array.from(
-        new Set(
-          projectData.projects.flatMap((p) => [
-            p.owner?._id,
-            ...(p.members?.map((m) => m._id) || []),
-          ])
-        )
-      ).filter(Boolean).length
+      new Set(
+        projectData.projects.flatMap((p) => [
+          p.owner?._id,
+          ...(p.members?.map((m) => m._id) || []),
+        ])
+      )
+    ).filter(Boolean).length
     : 6;
 
-  const avgVelocity = analytics?.velocitySummary?.avgVelocity 
-    ? Math.round(analytics.velocitySummary.avgVelocity * 100) 
+  const avgVelocity = analytics?.velocitySummary?.avgVelocity
+    ? Math.round(analytics.velocitySummary.avgVelocity * 100)
     : 72;
 
   const completionRate = analytics?.completedTasks && tasksData?.total
@@ -126,38 +126,40 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-8 animate-pulse-subtle">
-      {/* ─── Top Section ─────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b pb-6">
-        <div className="space-y-1">
-          <h1 className="font-heading text-3xl font-extrabold tracking-tight text-foreground">
+    <div className="space-y-8">
+      {/* ─── Header row — flex-row at all widths ≥ 640px ──────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-6">
+        <div className="space-y-1 min-w-0">
+          {/* h1: 24px font-weight 700 per spec */}
+          <h1 className="text-2xl font-bold font-heading tracking-tight text-foreground">
             {greeting}, {user?.name?.split(' ')[0] ?? 'there'} 👋
           </h1>
-          <p className="text-sm text-muted-foreground max-w-2xl">
-            Welcome back to FlowSprint. Here is a high-fidelity snapshot of your workspace's planning, backlogs, and agile developer velocity.
+          {/* Subtitle max-width 600px prevents overly long lines */}
+          <p className="text-sm text-muted-foreground max-w-[600px] leading-relaxed">
+            Welcome back to FlowSprint. Here is a real-time snapshot of your workspace's planning, backlogs, and agile velocity.
           </p>
         </div>
+        {/* Buttons: shrink-0 so they never wrap below the heading */}
         <div className="flex items-center gap-2.5 shrink-0">
           <Link
             to="/sprints"
-            className="inline-flex items-center gap-1.5 rounded-lg border bg-card px-3.5 py-2 text-xs font-semibold hover:bg-secondary transition-colors shadow-2xs"
+            className="inline-flex items-center gap-1.5 h-9 rounded-lg border bg-card px-4 text-xs font-semibold hover:bg-secondary transition-all duration-150 shadow-xs whitespace-nowrap active:scale-[0.98]"
           >
             <Flame className="h-4 w-4 text-amber-500" /> Plan Sprints
           </Link>
           <Link
             to="/tasks"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary text-primary-foreground px-3.5 py-2 text-xs font-semibold hover:bg-primary/95 transition-all shadow-sm active:scale-95"
+            className="inline-flex items-center gap-1.5 h-9 rounded-lg bg-primary text-primary-foreground px-4 text-xs font-semibold hover:bg-primary/90 transition-all duration-150 shadow-xs whitespace-nowrap active:scale-[0.98]"
           >
             <Plus className="h-4 w-4" /> Create Ticket
           </Link>
         </div>
       </div>
 
-      {/* ─── KPI Cards Row ───────────────────────────────────────────── */}
-      <div className="space-y-3.5">
-        <h2 className="text-3xs font-extrabold text-muted-foreground uppercase tracking-widest block">
-          Workspace Telemetry Snapshots
-        </h2>
+      {/* ─── KPI Cards ───────────────────────────────────────────────── */}
+      <div className="space-y-3">
+        {/* Section heading: 11px uppercase tracking-[0.1em] — matches spec h3 */}
+        <h2 className="section-label">Workspace Telemetry Snapshots</h2>
         <DashboardGrid variant="kpis">
           {isLoading
             ? Array.from({ length: 6 }).map((_, idx) => <SkeletonCard key={idx} variant="kpi" />)
@@ -165,11 +167,10 @@ export default function DashboardPage() {
         </DashboardGrid>
       </div>
 
-      {/* ─── Middle / Bottom Section widgets grid ────────────────────── */}
-      <div className="space-y-4 pt-1">
-        <h2 className="text-3xs font-extrabold text-muted-foreground uppercase tracking-widest block">
-          Analytics & Workload Streams
-        </h2>
+      {/* ─── Analytics & Workload ─────────────────────────────────── */}
+      <div className="space-y-3">
+        {/* Section heading: identical style to the KPI heading above */}
+        <h2 className="section-label">Analytics & Workload Streams</h2>
         <DashboardGrid variant="widgets">
           {/* Donut task chart */}
           {isLoading ? (

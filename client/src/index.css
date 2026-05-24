@@ -2,92 +2,329 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+/* ═══════════════════════════════════════════════════════════════════
+   DESIGN TOKENS — Single source of truth for all visual constants.
+   Use these in plain CSS; Tailwind classes map to the hsl() variants
+   defined below via CSS variables.
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  /* Brand */
+  --brand:               #7C3AED;
+  --brand-hover:         #6D28D9;
+  --brand-glow:          rgba(124, 58, 237, 0.25);
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+  /* Surfaces */
+  --surface:             #111114;
+  --surface-raised:      #1a1a1f;
+  --surface-overlay:     rgba(255, 255, 255, 0.04);
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+  /* Borders */
+  --border-subtle:       rgba(255, 255, 255, 0.08);
+  --border-muted:        rgba(255, 255, 255, 0.06);
 
-    --primary: 263.4 70% 50.4%;
-    --primary-foreground: 210 20% 98%;
+  /* Text */
+  --text-primary:        #ffffff;
+  --text-muted:          rgba(255, 255, 255, 0.5);
+  --text-placeholder:    rgba(255, 255, 255, 0.3);
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+  /* Radii */
+  --radius-card:         12px;
+  --radius-input:        8px;
+  --radius-btn:          8px;
+  --radius-pill:         999px;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+  /* Spacing (8px grid) */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+  /* Component sizing */
+  --input-h:   40px;
+  --nav-item-h: 40px;
+  --sidebar-w:  220px;
+  --sidebar-collapsed-w: 64px;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-
-    --radius: 0.75rem;
-  }
-
-  /* Force a refined light mode setup that keeps high-contrast readability */
-  .light {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-
-    --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 20% 98%;
-
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 262.1 83.3% 57.8%;
-  }
+  /* Tailwind hsl() variables (unchanged) */
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 263.4 70% 50.4%;
+  --primary-foreground: 210 20% 98%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+  --radius: 0.75rem;
 }
 
+/* Light mode overrides */
+.light {
+  --surface:           #ffffff;
+  --surface-raised:    #f5f5f7;
+  --surface-overlay:   rgba(0, 0, 0, 0.03);
+  --border-subtle:     rgba(0, 0, 0, 0.08);
+  --border-muted:      rgba(0, 0, 0, 0.06);
+  --text-primary:      #09090b;
+  --text-muted:        rgba(9, 9, 11, 0.5);
+  --text-placeholder:  rgba(9, 9, 11, 0.35);
+
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --primary: 262.1 83.3% 57.8%;
+  --primary-foreground: 210 20% 98%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 262.1 83.3% 57.8%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BASE LAYER — Reset, box-model, typography, focus
+   ═══════════════════════════════════════════════════════════════════ */
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
     @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+
+  html {
+    /* Prevent layout shifts when scrollbar appears/disappears */
+    scrollbar-gutter: stable;
+    -webkit-text-size-adjust: 100%;
   }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-heading tracking-tight;
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-size: 14px;
+    line-height: 1.6;
+    /* Always reserve scrollbar space — no layout shift */
+    overflow-y: scroll;
+  }
+
+  /* ── Typography scale ── */
+  h1 {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  h4, h5, h6 {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  /* ── Global focus ring — ALL focusable elements ── */
+  :focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+  /* Remove default outline when custom focus ring is applied */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* ── Input & textarea baseline ── */
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+    font-size: 14px;
+    height: var(--input-h);
+    padding: 0 12px;
+    background: var(--surface-overlay);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-input);
+    color: var(--text-primary);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--text-placeholder);
+  }
+  textarea {
+    height: auto;
+    min-height: 96px;
+    padding: 10px 12px;
+    resize: vertical;
+  }
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px var(--brand-glow);
+  }
+  input:disabled,
+  textarea:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 
-/* Premium micro-interactions & utility custom styles */
+/* ═══════════════════════════════════════════════════════════════════
+   Z-INDEX STACKING ORDER (documented)
+   --sidebar (fixed):      z-30
+   --mobile backdrop:      z-20
+   --sticky navbar:        z-20
+   --dropdown/popover:     z-40
+   --modal overlay:        z-50
+   --toast:                z-[9999]
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   UTILITY COMPONENT CLASSES
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Card standard ── */
+.card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  padding: var(--sp-5);
+}
+
+/* ── Button standards ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-btn);
+  border: none;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.btn-primary:hover  { background: var(--brand-hover); }
+.btn-primary:active { transform: scale(0.98); }
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-btn);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.btn-outline:hover  { border-color: var(--brand); }
+.btn-outline:active { transform: scale(0.98); }
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-btn);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.btn-danger:hover  { background: rgba(239, 68, 68, 0.25); }
+.btn-danger:active { transform: scale(0.98); }
+
+/* ── Section heading (replaces ad-hoc text-3xs uppercase patterns) ── */
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── Caption / hint text ── */
+.caption {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ── Active badge (ACTIVE session) ── */
+.badge-active {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: rgba(34, 197, 94, 0.15);
+  color: #22C55E;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Glassmorphism panels ── */
 .glassmorphism {
   background: rgba(23, 23, 27, 0.4);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
-
 .light .glassmorphism {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
@@ -95,16 +332,38 @@
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* Thin beautiful custom scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* ═══════════════════════════════════════════════════════════════════
+   SCROLLBARS
+   ═══════════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--muted)); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.3); }
+
+.scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+.custom-scrollbar::-webkit-scrollbar       { width: 4px; height: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 999px; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════ */
+@keyframes slide-in-from-bottom-2 {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.85; }
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-muted rounded-full hover:bg-muted-foreground/30 transition-colors;
-}
+.animate-in            { animation-fill-mode: both; }
+.fade-in               { animation-name: fade-in; }
+.slide-in-from-bottom-2 { animation-name: slide-in-from-bottom-2; }
+.duration-200          { animation-duration: 200ms; }

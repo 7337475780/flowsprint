@@ -10,6 +10,24 @@ export interface IUser extends Document {
   role: 'admin' | 'manager' | 'member';
   avatar?: string;
   isActive: boolean;
+  bio?: string;
+  preferences?: {
+    theme: 'light' | 'dark';
+    emailNotifications: boolean;
+    taskAlerts: boolean;
+    sprintAlerts: boolean;
+    mentionAlerts: boolean;
+  };
+  lastLogin?: Date;
+  activeSessions?: Array<{
+    _id: string;
+    token: string;
+    device: string;
+    ip: string;
+    lastActive: Date;
+  }>;
+  workspaces?: string[];
+  currentWorkspace?: string;
   createdAt: Date;
   updatedAt: Date;
 }

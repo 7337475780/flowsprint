@@ -7,11 +7,13 @@ import {
   UnauthorizedError,
 } from '../../utils/errors.js';
 import type { PaginatedProjects, ProjectStats } from './project.types.js';
+import { logEvent } from '../audit/audit.service.js';
+import { Workspace } from '../workspaces/workspace.model.js';
 
 /**
  * Establish a new project workspace.
  */
-export const createProject = async (data: any, ownerId: string): Promise<IProject> => {
+export const createProject = async (data: any, ownerId: string, workspaceId: string): Promise<IProject> => {
   const existingKey = await Project.findOne({ key: data.key.toUpperCase() });
   if (existingKey) {
     throw new BadRequestError(`Project key "${data.key}" already exists in workspace.`);
@@ -20,9 +22,18 @@ export const createProject = async (data: any, ownerId: string): Promise<IProjec
   const project = new Project({
     ...data,
     owner: ownerId,
+    workspaceId: workspaceId || undefined,
   });
 
-  return await project.save();
+  const saved = await project.save();
+
+  // Log auditing trail
+  await logEvent(ownerId, 'PROJECT_CREATED', 'Project', saved._id.toString(), {
+    name: saved.name,
+    key: saved.key,
+  });
+
+  return saved;
 };
 
 /**
@@ -34,6 +45,12 @@ export const getProjects = async (query: any, user: IUser): Promise<PaginatedPro
   const skip = (page - 1) * limit;
 
   const dbQuery: any = {};
+
+  // Enforce Workspace Isolation
+  const activeWorkspaceId = query.workspaceId || user.currentWorkspace?.toString();
+  if (activeWorkspaceId) {
+    dbQuery.workspaceId = activeWorkspaceId;
+  }
 
   // 1. Role-based Project Security Scope
   if (user.role === 'member') {
@@ -75,12 +92,13 @@ export const getProjects = async (query: any, user: IUser): Promise<PaginatedPro
       .populate('members', 'name email avatar')
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit),
+      .limit(limit)
+      .lean(),
     Project.countDocuments(dbQuery),
   ]);
 
   return {
-    data: projects,
+    data: projects as any as IProject[],
     total,
     page,
     limit,
@@ -98,6 +116,12 @@ export const getProjectById = async (id: string, user: IUser): Promise<IProject>
 
   if (!project) {
     throw new NotFoundError('Project workspace was not found');
+  }
+
+  // Enforce Workspace Isolation
+  const activeWorkspaceId = user.currentWorkspace?.toString();
+  if (project.workspaceId && project.workspaceId.toString() !== activeWorkspaceId) {
+    throw new UnauthorizedError('Access denied. Project does not belong to your active workspace context.');
   }
 
   const ownerId = (project.owner as any)._id?.toString() || project.owner.toString();
@@ -121,6 +145,12 @@ export const updateProject = async (id: string, updateData: any, user: IUser): P
   const project = await Project.findById(id);
   if (!project) {
     throw new NotFoundError('Project workspace was not found');
+  }
+
+  // Enforce Workspace Isolation
+  const activeWorkspaceId = user.currentWorkspace?.toString();
+  if (project.workspaceId && project.workspaceId.toString() !== activeWorkspaceId) {
+    throw new UnauthorizedError('Access denied. Project does not belong to your active workspace context.');
   }
 
   const ownerId = project.owner.toString();
@@ -158,6 +188,12 @@ export const updateProject = async (id: string, updateData: any, user: IUser): P
   });
 
   const updated = await project.save();
+
+  // Log auditing trail
+  await logEvent(user._id.toString(), 'PROJECT_UPDATED', 'Project', updated._id.toString(), {
+    name: updated.name,
+  });
+
   return (await updated.populate('owner', 'name email avatar')).populate('members', 'name email avatar');
 };
 
@@ -170,11 +206,22 @@ export const deleteProject = async (id: string, user: IUser): Promise<void> => {
     throw new NotFoundError('Project workspace was not found');
   }
 
+  // Enforce Workspace Isolation
+  const activeWorkspaceId = user.currentWorkspace?.toString();
+  if (project.workspaceId && project.workspaceId.toString() !== activeWorkspaceId) {
+    throw new UnauthorizedError('Access denied. Project does not belong to your active workspace context.');
+  }
+
   const ownerId = project.owner.toString();
   const canDelete = user.role === 'admin' || ownerId === user._id.toString();
   if (!canDelete) {
     throw new UnauthorizedError('Access denied. Only the project owner or admins can delete this workspace.');
   }
+
+  // Log auditing trail
+  await logEvent(user._id.toString(), 'PROJECT_DELETED', 'Project', project._id.toString(), {
+    name: project.name,
+  });
 
   await Project.findByIdAndDelete(id);
 };

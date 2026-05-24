@@ -1,14 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card.js';
 import { Button } from '../components/ui/Button.js';
-import { 
-  Activity, 
-  TrendingUp, 
-  CheckCircle2, 
-  Clock, 
-  ListTodo, 
-  Plus, 
-  Flame, 
-  Layers 
+import {
+  Activity,
+  TrendingUp,
+  CheckCircle2,
+  Clock,
+  ListTodo,
+  Plus,
+  Flame,
+  Layers
 } from 'lucide-react';
 
 export default function Dashboard() {

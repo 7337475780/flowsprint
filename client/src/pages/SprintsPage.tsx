@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import {
   Zap,
@@ -21,6 +21,7 @@ import EmptyState from '../components/common/EmptyState.js';
 import Loader from '../components/common/Loader.js';
 import { useAuthStore } from '../store/authStore.js';
 import { cn } from '../lib/utils.js';
+import { hasPermission } from '../lib/permissions.js';
 
 // Sprint Features Imports
 import {
@@ -36,14 +37,16 @@ import {
 } from '../features/sprints/hooks/useSprints.js';
 import { updateSprint } from '../features/sprints/api/sprintApi.js';
 import SprintCard from '../features/sprints/components/SprintCard.js';
-import SprintModal from '../features/sprints/components/SprintModal.js';
 import SprintStats from '../features/sprints/components/SprintStats.js';
 import SprintFilters from '../features/sprints/components/SprintFilters.js';
 import SprintProgress from '../features/sprints/components/SprintProgress.js';
 import SprintBoard from '../features/sprints/components/SprintBoard.js';
 import SprintTaskList from '../features/sprints/components/SprintTaskList.js';
-import BurndownChart from '../features/sprints/components/BurndownChart.js';
-import VelocityChart from '../features/sprints/components/VelocityChart.js';
+
+// Heavy Sprint Components Lazy Loaded
+const SprintModal = lazy(() => import('../features/sprints/components/SprintModal.js'));
+const BurndownChart = lazy(() => import('../features/sprints/components/BurndownChart.js'));
+const VelocityChart = lazy(() => import('../features/sprints/components/VelocityChart.js'));
 
 // Project Imports
 import { useProjectsQuery } from '../features/projects/hooks/useProjects.js';
@@ -109,7 +112,7 @@ export default function SprintsPage() {
     },
   });
 
-  const isEditor = user?.role === 'admin' || user?.role === 'manager';
+  const isEditor = hasPermission(user, 'manage:sprint');
 
   // Auto-select first active or planned sprint when list changes or on load
   useEffect(() => {
@@ -195,8 +198,13 @@ export default function SprintsPage() {
   };
 
   // Separate active/planned vs completed
-  const activeAndPlanned = sprints.filter((s) => s.status === 'active' || s.status === 'planned');
-  const completedAndCancelled = sprints.filter((s) => s.status === 'completed' || s.status === 'cancelled');
+  const activeAndPlanned = useMemo(() => {
+    return sprints.filter((s) => s.status === 'active' || s.status === 'planned');
+  }, [sprints]);
+
+  const completedAndCancelled = useMemo(() => {
+    return sprints.filter((s) => s.status === 'completed' || s.status === 'cancelled');
+  }, [sprints]);
 
   return (
     <div className="space-y-6">
@@ -493,9 +501,21 @@ export default function SprintsPage() {
                           <Loader2 className="h-6 w-6 text-primary animate-spin" />
                         </div>
                       ) : (
-                        <BurndownChart data={burndownPoints} />
+                        <Suspense fallback={
+                          <div className="h-[200px] flex items-center justify-center border rounded-2xl bg-card">
+                            <Loader2 className="h-6 w-6 text-primary animate-spin" />
+                          </div>
+                        }>
+                          <BurndownChart data={burndownPoints} />
+                        </Suspense>
                       )}
-                      <VelocityChart sprints={sprints} />
+                      <Suspense fallback={
+                        <div className="h-[200px] flex items-center justify-center border rounded-2xl bg-card">
+                          <Loader2 className="h-6 w-6 text-primary animate-spin" />
+                        </div>
+                      }>
+                        <VelocityChart sprints={sprints} />
+                      </Suspense>
                     </div>
 
                     {/* Rich Analytics Reports */}
@@ -590,15 +610,17 @@ export default function SprintsPage() {
       )}
 
       {/* ─── Sprint Modal (Plan / Edit) ───────────────────────── */}
-      <SprintModal
-        isOpen={sprintModalOpen}
-        onClose={() => {
-          setSprintModalOpen(false);
-          setEditingSprint(null);
-        }}
-        onSubmit={handleSprintSubmit}
-        sprint={editingSprint}
-      />
+      <Suspense fallback={null}>
+        <SprintModal
+          isOpen={sprintModalOpen}
+          onClose={() => {
+            setSprintModalOpen(false);
+            setEditingSprint(null);
+          }}
+          onSubmit={handleSprintSubmit}
+          sprint={editingSprint}
+        />
+      </Suspense>
 
       {/* ─── Sprint Complete Retrospective Dialog ──────────────── */}
       {retroModalOpen && (

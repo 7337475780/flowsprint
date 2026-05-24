@@ -81,6 +81,11 @@ const projectSchema = new Schema<IProject, ProjectModel>(
         trim: true,
       },
     ],
+    workspaceId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Workspace',
+      index: true,
+    },
   },
   {
     timestamps: true, // Automatically manages createdAt and updatedAt
@@ -121,6 +126,8 @@ projectSchema.pre('save', async function (next) {
 
 // 3. Define text indexes for text searches
 projectSchema.index({ name: 'text', key: 'text', tags: 'text' });
+projectSchema.index({ owner: 1 });
+projectSchema.index({ members: 1 });
 
 // 4. Export Project Model
 export const Project = model<IProject, ProjectModel>('Project', projectSchema);
