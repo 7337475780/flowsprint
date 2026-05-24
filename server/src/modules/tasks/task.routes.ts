@@ -28,6 +28,12 @@ router.get('/stats/overview', taskController.getTaskStats);
 router.get('/stats/:projectId', taskController.getTaskStats);
 
 /**
+ * @route   PATCH /api/tasks/reorder
+ * @desc    Reorder tasks drag and drop column shifting
+ */
+router.patch('/reorder', taskValidation.validateReorderTasks, taskController.reorderTasks);
+
+/**
  * @route   GET /api/tasks/:id
  * @desc    Get individual task details
  */
@@ -45,12 +51,6 @@ router.patch('/:id', taskValidation.validateUpdateTask, taskController.updateTas
  * @desc    Move task status and order
  */
 router.patch('/:id/move', taskController.moveTask);
-
-/**
- * @route   PATCH /api/tasks/reorder
- * @desc    Reorder tasks drag and drop column shifting
- */
-router.patch('/reorder', taskValidation.validateReorderTasks, taskController.reorderTasks);
 
 /**
  * @route   PATCH /api/tasks/:id/subtasks/:subtaskId
