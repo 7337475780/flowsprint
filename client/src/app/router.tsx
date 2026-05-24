@@ -57,5 +57,11 @@ export const router = createBrowserRouter(
 
     // ─── 404 fallback ────────────────────────────────────────────────────
     { path: '*', element: <NotFoundPage /> },
-  ]
+  ],
+  {
+    future: {
+      v7_startTransition: true,
+      v7_relativeSplatPath: true,
+    } as any,
+  }
 );

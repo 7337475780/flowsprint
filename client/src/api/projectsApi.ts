@@ -47,8 +47,14 @@ export interface ProjectResponse {
  * Get paginated and filtered project listings.
  */
 export const getProjects = async (params?: Record<string, any>): Promise<ProjectsResponse['data']> => {
-  const { data } = await api.get<ProjectsResponse>('/projects', { params });
-  return data.data;
+  const { data } = await api.get<any>('/projects', { params });
+  const rawData = data.data;
+  return {
+    projects: rawData?.data || rawData?.projects || [],
+    total: rawData?.total ?? 0,
+    page: rawData?.page ?? 1,
+    pages: rawData?.totalPages || rawData?.pages || 1,
+  };
 };
 
 /**

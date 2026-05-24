@@ -215,7 +215,7 @@ export const getTasks = async (
 /**
  * Retrieves a single task and verifies project membership.
  */
-export const getTaskById = async (id: string, user: IUser): Promise<ITask> => {
+export const getTaskById = async (id: string, user: IUser): Promise<ITask | null> => {
   const task = await Task.findById(id)
     .populate('project', 'name slug owner members')
     .populate('assignee', 'name email avatar')
@@ -223,11 +223,14 @@ export const getTaskById = async (id: string, user: IUser): Promise<ITask> => {
     .populate('comments.author', 'name email avatar');
 
   if (!task) {
-    throw new NotFoundError('Task was not found');
+    return null;
   }
 
-  // Verify that member has access to this parent project
-  await checkProjectAccess(task.project.toString(), user);
+  // Verify that member has access to this parent project safely
+  const projectId = (task.project as any)?._id?.toString() || task.project?.toString();
+  if (projectId) {
+    await checkProjectAccess(projectId, user);
+  }
 
   return task;
 };
@@ -387,8 +390,8 @@ export const deleteTask = async (id: string, user: IUser): Promise<void> => {
  */
 export const moveTask = async (
   id: string,
-  newStatus: 'backlog' | 'todo' | 'in-progress' | 'review' | 'done',
-  newOrder: number,
+  newStatus: string,
+  newOrder: number | undefined,
   user: IUser
 ): Promise<ITask> => {
   const task = await Task.findById(id).populate('project', 'owner');
@@ -409,35 +412,35 @@ export const moveTask = async (
   const oldStatus = task.status;
   const oldOrder = task.order;
 
-  if (oldStatus === newStatus && oldOrder === newOrder) {
-    return task;
+  task.status = newStatus as any;
+
+  if (newOrder !== undefined && newOrder !== null) {
+    if (oldStatus !== newStatus || oldOrder !== newOrder) {
+      // 1. Open slot in destination column (increment order of tasks with order >= newOrder)
+      await Task.updateMany(
+        {
+          project: task.project,
+          status: newStatus,
+          _id: { $ne: task._id },
+          order: { $gte: newOrder },
+        },
+        { $inc: { order: 1, position: 1 } }
+      );
+
+      // 2. Close gap in source column (decrement order of tasks with order > oldOrder)
+      await Task.updateMany(
+        {
+          project: task.project,
+          status: oldStatus,
+          _id: { $ne: task._id },
+          order: { $gt: oldOrder },
+        },
+        { $inc: { order: -1, position: -1 } }
+      );
+    }
+    task.order = newOrder;
+    task.position = newOrder;
   }
-
-  // 1. Open slot in destination column (increment order of tasks with order >= newOrder)
-  await Task.updateMany(
-    {
-      project: task.project,
-      status: newStatus,
-      _id: { $ne: task._id },
-      order: { $gte: newOrder },
-    },
-    { $inc: { order: 1 } }
-  );
-
-  // 2. Close gap in source column (decrement order of tasks with order > oldOrder)
-  await Task.updateMany(
-    {
-      project: task.project,
-      status: oldStatus,
-      _id: { $ne: task._id },
-      order: { $gt: oldOrder },
-    },
-    { $inc: { order: -1 } }
-  );
-
-  // 3. Update task
-  task.status = newStatus;
-  task.order = newOrder;
 
   task.activities.push({
     action: 'moved',
@@ -466,6 +469,38 @@ export const moveTask = async (
   }
 
   return savedTask;
+};
+
+/**
+ * Reorders a batch of tasks (for drag and drop sorting).
+ */
+export const bulkReorder = async (
+  reorders: { taskId: string; status: 'backlog' | 'todo' | 'in-progress' | 'review' | 'done'; order: number }[],
+  user: IUser
+): Promise<void> => {
+  if (!reorders || reorders.length === 0) return;
+
+  const bulkOps = reorders.map((item) => ({
+    updateOne: {
+      filter: { _id: item.taskId },
+      update: {
+        $set: {
+          status: item.status,
+          order: item.order,
+          position: item.order,
+        },
+        $push: {
+          activities: {
+            action: 'moved',
+            performedBy: user._id,
+            details: `Moved task drag reordered to status "${item.status}" at order ${item.order}`,
+          },
+        },
+      },
+    },
+  }));
+
+  await Task.bulkWrite(bulkOps as any);
 };
 
 /**

@@ -10,16 +10,26 @@ interface TaskCardProps {
   onDelete: (id: string) => void;
   onClick: (task: Task) => void;
   className?: string;
+  onDragOverCard?: (e: React.DragEvent, taskId: string, direction: 'above' | 'below') => void;
+  onDragLeaveCard?: (e: React.DragEvent) => void;
 }
 
 const PRIORITY_BADGES = {
-  low: 'bg-slate-500/10 text-slate-400 border border-slate-500/20',
-  medium: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20',
-  high: 'bg-amber-500/10 text-amber-500 border border-amber-500/20',
-  critical: 'bg-rose-500/10 text-rose-500 border border-rose-500/20',
+  low: 'bg-slate-500/10 text-slate-400 border border-slate-500/20 dark:bg-slate-500/5',
+  medium: 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 dark:bg-indigo-500/5',
+  high: 'bg-amber-500/10 text-amber-500 border border-amber-500/20 dark:bg-amber-500/5',
+  critical: 'bg-rose-500/10 text-rose-500 border border-rose-500/20 dark:bg-rose-500/5',
 };
 
-const TaskCard = memo(function TaskCard({ task, onEdit, onDelete, onClick, className }: TaskCardProps) {
+const TaskCard = memo(function TaskCard({
+  task,
+  onEdit,
+  onDelete,
+  onClick,
+  className,
+  onDragOverCard,
+  onDragLeaveCard,
+}: TaskCardProps) {
   const user = useAuthStore((s) => s.user);
 
   const reporterId = typeof task.reporter === 'object' ? task.reporter._id : task.reporter;
@@ -33,16 +43,37 @@ const TaskCard = memo(function TaskCard({ task, onEdit, onDelete, onClick, class
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData('text/plain', task._id);
     e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.classList.add('opacity-40');
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    e.currentTarget.classList.remove('opacity-40');
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (!onDragOverCard) return;
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const relativeY = e.clientY - rect.top;
+    const isTopHalf = relativeY < rect.height / 2;
+    onDragOverCard(e, task._id, isTopHalf ? 'above' : 'below');
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (onDragLeaveCard) onDragLeaveCard(e);
   };
 
   return (
     <div
       draggable
       onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
       onClick={() => onClick(task)}
       className={cn(
-        'group relative border bg-card rounded-2xl p-4 flex flex-col justify-between shadow-2xs cursor-grab active:cursor-grabbing',
-        'hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 border-l-3 border-l-primary/30',
+        'group relative border bg-card/75 backdrop-blur-md rounded-2xl p-4 flex flex-col justify-between shadow-xs cursor-grab active:cursor-grabbing',
+        'hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5 border-slate-200/80 dark:border-slate-800/80 hover:border-primary/40 dark:hover:border-primary/40 border-l-4 border-l-primary/60',
         className
       )}
     >

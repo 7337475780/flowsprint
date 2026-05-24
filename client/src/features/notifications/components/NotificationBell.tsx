@@ -19,12 +19,9 @@ export default function NotificationBell() {
       
       // Initial fetch to load the unread counts count
       fetchNotifications();
-    }
-
-    return () => {
-      // Disconnect socket on unmount (or when token drops)
+    } else if (!isAuthenticated) {
       disconnectSocket();
-    };
+    }
   }, [isAuthenticated, token, fetchNotifications]);
 
   const handleToggleDropdown = () => {

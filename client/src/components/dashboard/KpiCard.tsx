@@ -48,7 +48,7 @@ export default function KpiCard({
     .join(' ');
 
   const strokeColor =
-    trend === 'up' ? '#10b981' : trend === 'down' ? '#34d399' : '#059669';
+    trend === 'up' ? '#10b981' : trend === 'down' ? '#f43f5e' : '#94a3b8';
 
   return (
     <div

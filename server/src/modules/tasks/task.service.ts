@@ -177,7 +177,7 @@ export const getTasks = async (query: any, user: IUser): Promise<PaginatedTasks>
 /**
  * 3. Retrieve single task.
  */
-export const getTaskById = async (id: string, user: IUser): Promise<ITask> => {
+export const getTaskById = async (id: string, user: IUser): Promise<ITask | null> => {
   const task = await Task.findById(id)
     .populate('assignee', 'name email avatar')
     .populate('reporter', 'name email avatar')
@@ -185,10 +185,13 @@ export const getTaskById = async (id: string, user: IUser): Promise<ITask> => {
     .populate('comments.author', 'name email avatar');
 
   if (!task) {
-    throw new NotFoundError('Task item not found');
+    return null;
   }
 
-  await checkProjectAccess(task.project.toString(), user);
+  const projId = (task.project as any)?._id?.toString() || task.project?.toString();
+  if (projId) {
+    await checkProjectAccess(projId, user);
+  }
   return task;
 };
 
@@ -298,14 +301,105 @@ export const deleteTask = async (id: string, user: IUser): Promise<void> => {
 };
 
 /**
- * 6. Task actions: Quick status transition.
+ * 6. Task actions: Move task status and order rank.
  */
-export const updateTaskStatus = async (id: string, newStatus: string, user: IUser): Promise<ITask> => {
-  return await updateTask(id, { status: newStatus }, user);
+export const moveTask = async (
+  id: string,
+  newStatus: string,
+  newOrder: number | undefined,
+  user: IUser
+): Promise<ITask | null> => {
+  const task = await Task.findById(id);
+  if (!task) {
+    return null;
+  }
+
+  await checkProjectAccess(task.project.toString(), user);
+
+  const fullAccess = await canModifyTaskDetails(task, user);
+  const isAssignee = task.assignee && task.assignee.toString() === user._id.toString();
+
+  if (!fullAccess && !isAssignee) {
+    throw new UnauthorizedError('Access denied. You do not have permissions to move this task.');
+  }
+
+  const oldStatus = task.status;
+  const oldOrder = task.order;
+
+  task.status = newStatus as any;
+
+  if (newOrder !== undefined && newOrder !== null) {
+    if (oldStatus !== newStatus || oldOrder !== newOrder) {
+      // 1. Open slot in destination column (increment order of tasks with order >= newOrder)
+      await Task.updateMany(
+        {
+          project: task.project,
+          status: newStatus,
+          _id: { $ne: task._id },
+          order: { $gte: newOrder },
+        },
+        { $inc: { order: 1, position: 1 } }
+      );
+
+      // 2. Close gap in source column (decrement order of tasks with order > oldOrder)
+      await Task.updateMany(
+        {
+          project: task.project,
+          status: oldStatus,
+          _id: { $ne: task._id },
+          order: { $gt: oldOrder },
+        },
+        { $inc: { order: -1, position: -1 } }
+      );
+    }
+    task.order = newOrder;
+    task.position = newOrder;
+  }
+
+  task.activities.push({
+    action: 'moved',
+    performedBy: user._id as any,
+    details: `Task status changed from [${oldStatus}] to [${newStatus}]`,
+  } as any);
+
+  const saved = await task.save();
+  return (await saved.populate('assignee', 'name email avatar')).populate('reporter', 'name email avatar');
 };
 
 /**
- * 7. Drag & Drop Reorder positioning logic.
+ * 7. Bulk drag & drop reorder within a column.
+ */
+export const bulkReorder = async (
+  reorders: { taskId: string; status: 'backlog' | 'todo' | 'in-progress' | 'review' | 'done'; order: number }[],
+  user: IUser
+): Promise<void> => {
+  if (!reorders || reorders.length === 0) return;
+
+  const bulkOps = reorders.map((item) => ({
+    updateOne: {
+      filter: { _id: item.taskId },
+      update: {
+        $set: {
+          status: item.status,
+          order: item.order,
+          position: item.order,
+        },
+        $push: {
+          activities: {
+            action: 'moved',
+            performedBy: user._id,
+            details: `Moved task drag reordered to status "${item.status}" at order ${item.order}`,
+          },
+        },
+      },
+    },
+  }));
+
+  await Task.bulkWrite(bulkOps as any);
+};
+
+/**
+ * 7.5 Drag & Drop Reorder positioning logic (legacy fallback).
  */
 export const reorderTasks = async (
   id: string,

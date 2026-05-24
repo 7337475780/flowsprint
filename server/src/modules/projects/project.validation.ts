@@ -14,6 +14,7 @@ export const createProjectSchema = z.object({
   startDate: z.string().or(z.date()).optional(),
   dueDate: z.string().or(z.date()).optional(),
   tags: z.array(z.string()).optional(),
+  members: z.array(z.string()).optional(),
 });
 
 export const updateProjectSchema = createProjectSchema.partial();

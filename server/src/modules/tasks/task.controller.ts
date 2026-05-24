@@ -52,6 +52,10 @@ export const getTaskById = asyncHandler(async (req: AuthenticatedRequest, res: R
   }
 
   const task = await taskService.getTaskById(taskId, req.user!);
+  if (!task) {
+    return res.status(404).json({ message: "Task not found" });
+  }
+
   appCache.set(cacheKey, task, 300_000); // 5 minutes TTL
 
   res.status(200).json({
@@ -86,35 +90,55 @@ export const deleteTask = asyncHandler(async (req: AuthenticatedRequest, res: Re
   });
 });
 
-export const updateTaskStatus = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const task = await taskService.updateTaskStatus(req.params.id, req.body.status, req.user!);
+export const moveTask = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  const { status, position, order } = req.body;
+  const { id } = req.params;
+
+  if (!status) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid request: "status" variable is required in body.',
+    });
+  }
+
+  const finalOrder = position !== undefined ? position : order;
+  const task = await taskService.moveTask(id, status, finalOrder, req.user!);
   
+  if (!task) {
+    return res.status(404).json({ message: "Task not found" });
+  }
+
   // Invalidate cache
-  invalidateTaskCache(req.params.id, req.user!._id.toString());
+  invalidateTaskCache(id, req.user!._id.toString());
 
   res.status(200).json({
     success: true,
-    message: 'Task status updated successfully',
+    message: 'Task status moved successfully',
     data: task,
   });
 });
 
 export const reorderTasks = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-  const task = await taskService.reorderTasks(
-    req.params.id,
-    req.body.status,
-    req.body.position,
-    req.user!
-  );
-  
-  // Invalidate cache
-  invalidateTaskCache(req.params.id, req.user!._id.toString());
+  console.log("REORDER PAYLOAD:", req.body);
 
-  res.status(200).json({
-    success: true,
-    message: 'Task reordered successfully',
-    data: task,
-  });
+  const { reorders } = req.body;
+
+  if (!reorders || !Array.isArray(reorders)) {
+    return res.status(400).json({ message: "Invalid reorder payload" });
+  }
+
+  for (const item of reorders) {
+    if (!item || !item.taskId || typeof item.order !== 'number') {
+      return res.status(400).json({ message: "Invalid reorder payload" });
+    }
+  }
+
+  await taskService.bulkReorder(reorders, req.user!);
+  
+  // Invalidate user analytics cache
+  invalidateAnalyticsCache(req.user!._id.toString());
+
+  res.status(200).json({ success: true });
 });
 
 export const addComment = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {

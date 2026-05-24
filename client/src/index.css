@@ -118,19 +118,20 @@
   }
 
   html {
-    /* Prevent layout shifts when scrollbar appears/disappears */
-    scrollbar-gutter: stable;
     -webkit-text-size-adjust: 100%;
+    overflow: hidden;
+    height: 100%;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
+    background: radial-gradient(125% 125% at 50% 0%, #0d0e13 0%, #040406 100%) !important;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     font-size: 14px;
     line-height: 1.6;
-    /* Always reserve scrollbar space — no layout shift */
-    overflow-y: scroll;
+    overflow: hidden;
+    height: 100%;
   }
 
   /* ── Typography scale ── */
@@ -320,16 +321,45 @@
 
 /* ── Glassmorphism panels ── */
 .glassmorphism {
-  background: rgba(23, 23, 27, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(13, 13, 18, 0.65) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
 }
 .light .glassmorphism {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04) !important;
+}
+
+/* ── Premium Interactions ── */
+.premium-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.premium-hover:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 30px -10px rgba(124, 58, 237, 0.25) !important;
+  border-color: rgba(124, 58, 237, 0.3) !important;
+}
+
+/* ── Glowing Card outline ── */
+.glow-border {
+  position: relative;
+}
+.glow-border::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(to bottom right, rgba(124, 58, 237, 0.3), rgba(124, 58, 237, 0.05));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -367,3 +397,113 @@
 .fade-in               { animation-name: fade-in; }
 .slide-in-from-bottom-2 { animation-name: slide-in-from-bottom-2; }
 .duration-200          { animation-duration: 200ms; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   FLOWSPRINT BRAND LOADER ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════ */
+@keyframes draw1 {
+  from {
+    stroke-dasharray: 180;
+    stroke-dashoffset: 180;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes draw2 {
+  from {
+    stroke-dasharray: 120;
+    stroke-dashoffset: 120;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes draw3 {
+  from {
+    stroke-dasharray: 140;
+    stroke-dashoffset: 140;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes arrowPop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+.animate-draw1 {
+  animation: draw1 0.8s ease forwards;
+}
+
+.animate-draw2 {
+  animation: draw2 0.8s ease forwards;
+  animation-delay: 0.3s;
+}
+
+.animate-draw3 {
+  animation: draw3 0.8s ease forwards;
+  animation-delay: 0.6s;
+}
+
+.animate-arrow {
+  transform-origin: center;
+  animation: arrowPop 0.5s ease forwards;
+  animation-delay: 1s;
+}
+
+.animate-progress {
+  animation: progress 1.8s infinite linear;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PREMIUM DATE INPUT CALENDAR OVERLAY STYLING
+   ═══════════════════════════════════════════════════════════════════ */
+input[type="date"] {
+  position: relative;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+  z-index: 2;
+}
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-clear-button {
+  display: none;
+  -webkit-appearance: none;
+}

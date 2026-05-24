@@ -27,9 +27,9 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="space-y-8 animate-pulse-subtle">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 bg-gradient-to-b from-primary/5 via-background/10 to-background/5">
       {/* Upper header action area */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-card p-4 border rounded-2xl shadow-sm glassmorphism">
         <div>
           <h1 className="font-heading text-3xl font-bold tracking-tight">FlowSprint Dashboard</h1>
           <p className="text-muted-foreground mt-1 text-sm">Welcome back. Here is your team's velocity and planning workspace overview.</p>
@@ -47,11 +47,11 @@ export default function Dashboard() {
       </div>
 
       {/* Grid of stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
           return (
-            <Card key={i} className="glassmorphism">
+            <Card key={i} className="glassmorphism shadow-xl transition-transform hover:scale-105 border-transparent bg-card/60">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                 <span className="text-sm font-medium text-muted-foreground">{stat.label}</span>
                 <div className={`p-2 rounded-lg ${stat.color}`}>
@@ -118,7 +118,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Recent activity card */}
-        <Card className="glassmorphism">
+        <Card className="glassmorphism shadow-xl transition-transform hover:scale-105">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5 text-primary" />

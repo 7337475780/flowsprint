@@ -6,7 +6,7 @@ import {
   updateTask,
   deleteTask,
   moveTask,
-  reorderTasks,
+  reorderTasks as reorderTask,
   addComment,
   editComment,
   deleteComment,
@@ -16,7 +16,9 @@ import {
   createTaskValidator,
   updateTaskValidator,
   taskIdValidator,
+  reorderTaskValidator,
 } from '../validators/taskValidator.js';
+
 
 const router = Router();
 
@@ -50,13 +52,14 @@ router.get('/:id', taskIdValidator, getTaskById);
  * @access  Private (Owner / Manager / Assignee only)
  */
 router.put('/:id', taskIdValidator, updateTaskValidator, updateTask);
+router.patch('/:id', taskIdValidator, updateTaskValidator, updateTask);
 
 /**
  * @route   PATCH /api/tasks/reorder
  * @desc    Reorder tasks drag and drop column shifting
  * @access  Private (Owner/Manager/Assignee only)
  */
-router.patch('/reorder', reorderTasks);
+router.patch('/reorder', reorderTaskValidator, reorderTask);
 
 /**
  * @route   PATCH /api/tasks/:id/move

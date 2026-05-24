@@ -54,7 +54,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b bg-card px-4 gap-4">
+    <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b bg-white/80 dark:bg-card/75 backdrop-blur-md px-4 gap-4 border-slate-200/50 dark:border-slate-800/50">
 
       {/* Left — hamburger + breadcrumb */}
       <div className="flex items-center gap-3">
@@ -111,22 +111,22 @@ export default function Navbar() {
 
           {/* Dropdown menu */}
           {menuOpen && (
-            <div className="absolute right-0 top-full mt-2 w-44 rounded-xl border bg-card shadow-lg py-1.5 z-50">
+            <div className="absolute right-0 top-full mt-2 w-44 rounded-xl border bg-white/90 dark:bg-card/90 backdrop-blur-lg shadow-xl py-1.5 z-50 border-slate-200/50 dark:border-slate-800/50">
               <button
                 onClick={() => { navigate('/profile'); setMenuOpen(false); }}
-                className="flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-secondary transition-colors"
+                className="flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
               >
                 <User className="h-4 w-4 text-muted-foreground" />
                 Profile
               </button>
               <button
                 onClick={() => { navigate('/settings'); setMenuOpen(false); }}
-                className="flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-secondary transition-colors"
+                className="flex w-full items-center gap-2.5 px-3 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
               >
                 <Settings className="h-4 w-4 text-muted-foreground" />
                 Settings
               </button>
-              <div className="my-1 border-t" />
+              <div className="my-1 border-t border-slate-200/50 dark:border-slate-800/50" />
               <button
                 onClick={handleLogout}
                 className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"

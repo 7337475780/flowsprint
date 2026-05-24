@@ -4,7 +4,7 @@ import { uploadFiles } from '../../files/api/fileApi.js';
 import { useUpdateProfileMutation } from '../hooks/useProfile.js';
 import { useAuthStore } from '../../../store/authStore.js';
 import { toast } from 'sonner';
-import { cn } from '../../../lib/utils.js';
+import { cn, resolveAssetUrl } from '../../../lib/utils.js';
 
 interface AvatarUploaderProps {
   className?: string;
@@ -59,11 +59,7 @@ export default function AvatarUploader({ className }: AvatarUploaderProps) {
   };
 
   // Safe avatar URL resolution
-  const resolvedAvatar = user?.avatar
-    ? user.avatar.startsWith('http')
-      ? user.avatar
-      : `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}${user.avatar}`
-    : null;
+  const resolvedAvatar = user?.avatar ? resolveAssetUrl(user.avatar) : null;
 
   return (
     <div className={cn('flex flex-col items-center justify-center space-y-2.5', className)}>

@@ -53,6 +53,11 @@ export const getTaskById = asyncHandler(async (req: AuthenticatedRequest, res: R
   const { id } = req.params;
   const task = await taskService.getTaskById(id, user);
 
+  if (!task) {
+    res.status(404).json({ message: "Task not found" });
+    return;
+  }
+
   return sendSuccess(res, 'Task details retrieved successfully', task, 200);
 });
 
@@ -105,17 +110,23 @@ export const moveTask = asyncHandler(async (req: AuthenticatedRequest, res: Resp
   }
 
   const { id } = req.params;
-  const { status, order } = req.body;
+  const { status, position, order } = req.body;
 
-  if (!status || order === undefined) {
+  if (!status) {
     res.status(400).json({
       success: false,
-      message: 'Invalid request: "status" and "order" variables are required in body.',
+      message: 'Invalid request: "status" variable is required in body.',
     });
     return;
   }
 
-  const task = await taskService.moveTask(id, status, order, user);
+  const finalOrder = position !== undefined ? position : order;
+  const task = await taskService.moveTask(id, status, finalOrder, user);
+
+  if (!task) {
+    res.status(404).json({ message: "Task not found" });
+    return;
+  }
 
   return sendSuccess(res, 'Task status moved successfully', task, 200);
 });
@@ -126,25 +137,31 @@ export const moveTask = asyncHandler(async (req: AuthenticatedRequest, res: Resp
  * @access  Private (Owner/Manager/Assignee only)
  */
 export const reorderTasks = asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+  console.log("REORDER PAYLOAD:", req.body);
+
   const user = req.user;
   if (!user) {
     res.status(401).json({ success: false, message: 'Unauthorized' });
     return;
   }
 
-  const { taskId, sourceStatus, destinationStatus, sourceIndex, destinationIndex } = req.body;
+  const { reorders } = req.body;
 
-  if (!taskId || !sourceStatus || !destinationStatus || sourceIndex === undefined || destinationIndex === undefined) {
-    res.status(400).json({
-      success: false,
-      message: 'Invalid request parameters for drag and drop: "taskId", "sourceStatus", "destinationStatus", "sourceIndex", and "destinationIndex" are required.',
-    });
+  if (!reorders || !Array.isArray(reorders)) {
+    res.status(400).json({ message: "Invalid reorder payload" });
     return;
   }
 
-  const task = await taskService.reorderTasks(taskId, sourceStatus, destinationStatus, sourceIndex, destinationIndex, user);
+  for (const item of reorders) {
+    if (!item || !item.taskId || typeof item.order !== 'number') {
+      res.status(400).json({ message: "Invalid reorder payload" });
+      return;
+    }
+  }
 
-  return sendSuccess(res, 'Tasks reordered successfully', task, 200);
+  await taskService.bulkReorder(reorders, user);
+
+  res.status(200).json({ success: true });
 });
 
 /**

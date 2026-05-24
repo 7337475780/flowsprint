@@ -75,8 +75,13 @@ export interface TaskResponse {
  * Get paginated and filtered tasks.
  */
 export const getTasks = async (params?: Record<string, any>): Promise<TasksResponse['data']> => {
-  const { data } = await api.get<TasksResponse>('/tasks', { params });
-  return data.data;
+  const { data } = await api.get<any>('/tasks', { params });
+  return {
+    tasks: data.data.data,
+    total: data.data.total,
+    page: data.data.page,
+    pages: data.data.totalPages,
+  };
 };
 
 /**

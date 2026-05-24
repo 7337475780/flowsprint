@@ -18,7 +18,7 @@ export default function SprintTaskList({ sprint }: SprintTaskListProps) {
     archived: false,
   });
 
-  const projectTasks = projectTasksData?.data ?? [];
+  const projectTasks = projectTasksData?.tasks ?? [];
   const manageTasksMutation = useManageSprintTasksMutation(sprintId);
 
   // Group tasks into "Assigned to Sprint" vs "Available in Backlog"

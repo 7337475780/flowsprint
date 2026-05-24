@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { cn } from '../../../lib/utils.js';
 import type { Task } from '../api/taskApi.js';
 import TaskCard from './TaskCard.js';
@@ -51,9 +52,31 @@ export default function TaskColumn({
   const theme = COLUMN_THEMES[status];
   const reorderMutation = useReorderTasksMutation();
 
-  const handleDragOver = (e: React.DragEvent) => {
+  // Local drag-and-drop state trackers
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
+  const [dropPosition, setDropPosition] = useState<'above' | 'below' | null>(null);
+  const [isColumnDraggedOver, setIsColumnDraggedOver] = useState(false);
+
+  const handleDragOverColumn = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+    setIsColumnDraggedOver(true);
+  };
+
+  const handleDragLeaveColumn = () => {
+    setIsColumnDraggedOver(false);
+    setHoveredCardId(null);
+    setDropPosition(null);
+  };
+
+  const handleDragOverCard = (e: React.DragEvent, taskId: string, direction: 'above' | 'below') => {
+    e.stopPropagation();
+    setHoveredCardId(taskId);
+    setDropPosition(direction);
+  };
+
+  const handleDragLeaveCard = () => {
+    // We let the dragOver event continuously refresh it to prevent blinking
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -61,18 +84,63 @@ export default function TaskColumn({
     const taskId = e.dataTransfer.getData('text/plain');
     if (!taskId) return;
 
-    // Drop at the bottom of the target status column
-    const targetPosition = tasks.length;
-    reorderMutation.mutate({ id: taskId, status, position: targetPosition });
+    let targetPosition = tasks.length;
+
+    if (hoveredCardId) {
+      const sortedTasks = [...tasks].sort((a, b) => a.position - b.position);
+      const hoveredTaskIndex = sortedTasks.findIndex((t) => t._id === hoveredCardId);
+      if (hoveredTaskIndex !== -1) {
+        const hoveredTask = sortedTasks[hoveredTaskIndex];
+        if (dropPosition === 'above') {
+          targetPosition = hoveredTask.position;
+        } else {
+          // If placing below, we target the position of the next slot
+          targetPosition = hoveredTask.position + 1;
+        }
+      }
+    }
+
+    // Construct the new list of tasks in the target column
+    const currentTasks = [...tasks];
+    const existingIndex = currentTasks.findIndex((t) => t._id === taskId);
+    let draggedTask: Task;
+    if (existingIndex !== -1) {
+      draggedTask = currentTasks.splice(existingIndex, 1)[0];
+    } else {
+      draggedTask = { _id: taskId, status } as Task;
+    }
+
+    const sortedTasks = [...currentTasks].sort((a, b) => a.position - b.position);
+    let targetIndex = sortedTasks.findIndex((t) => t.position >= targetPosition);
+    if (targetIndex === -1) {
+      targetIndex = sortedTasks.length;
+    }
+
+    sortedTasks.splice(targetIndex, 0, draggedTask);
+
+    const reorders = sortedTasks.map((t, index) => ({
+      taskId: t._id,
+      status: status,
+      order: index,
+    }));
+
+    reorderMutation.mutate(reorders);
+
+    // Clean up states
+    setHoveredCardId(null);
+    setDropPosition(null);
+    setIsColumnDraggedOver(false);
   };
 
   return (
     <div
-      onDragOver={handleDragOver}
+      onDragOver={handleDragOverColumn}
+      onDragLeave={handleDragLeaveColumn}
       onDrop={handleDrop}
       className={cn(
         'flex flex-col h-full min-h-[550px] w-[280px] md:w-[320px] shrink-0 rounded-2xl border bg-card/65 backdrop-blur-xs shadow-3xs overflow-hidden transition-all duration-300',
         theme.border,
+        isColumnDraggedOver && 'border-primary/40 bg-primary/[0.01]',
         reorderMutation.isPending && 'opacity-60 cursor-wait'
       )}
     >
@@ -90,25 +158,51 @@ export default function TaskColumn({
       </div>
 
       {/* Task Cards container */}
-      <div className="flex-1 p-3 overflow-y-auto space-y-3 custom-scrollbar">
+      <div
+        className={cn(
+          'flex-1 p-3 overflow-y-auto space-y-3 custom-scrollbar transition-all duration-200',
+          isColumnDraggedOver && tasks.length === 0 && 'bg-primary/[0.02]'
+        )}
+      >
         {tasks.length === 0 ? (
-          <div className="h-36 flex flex-col items-center justify-center border border-dashed rounded-xl p-4 text-center">
-            <span className="text-4xs font-bold uppercase tracking-widest text-muted-foreground">
-              Empty Column
+          <div
+            className={cn(
+              'h-36 flex flex-col items-center justify-center border border-dashed rounded-xl p-4 text-center transition-all duration-200',
+              isColumnDraggedOver
+                ? 'border-primary/50 bg-primary/5 scale-[0.98] text-primary'
+                : 'border-slate-200/80 dark:border-slate-800/80 text-muted-foreground'
+            )}
+          >
+            <span className="text-4xs font-bold uppercase tracking-widest">
+              {isColumnDraggedOver ? 'Drop card here' : 'Empty Column'}
             </span>
           </div>
         ) : (
-          tasks
+          [...tasks]
             .sort((a, b) => a.position - b.position)
-            .map((task) => (
-              <TaskCard
-                key={task._id}
-                task={task}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                onClick={onCardClick}
-              />
-            ))
+            .map((task) => {
+              const showAbove = hoveredCardId === task._id && dropPosition === 'above';
+              const showBelow = hoveredCardId === task._id && dropPosition === 'below';
+
+              return (
+                <div key={task._id} className="transition-all duration-200">
+                  {showAbove && (
+                    <div className="h-1 bg-gradient-to-r from-primary/10 via-primary to-primary/10 rounded-full border border-primary animate-pulse my-2" />
+                  )}
+                  <TaskCard
+                    task={task}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onClick={onCardClick}
+                    onDragOverCard={handleDragOverCard}
+                    onDragLeaveCard={handleDragLeaveCard}
+                  />
+                  {showBelow && (
+                    <div className="h-1 bg-gradient-to-r from-primary/10 via-primary to-primary/10 rounded-full border border-primary animate-pulse my-2" />
+                  )}
+                </div>
+              );
+            })
         )}
       </div>
     </div>

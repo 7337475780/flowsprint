@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -32,15 +33,13 @@ app.use(helmet({
   crossOriginResourcePolicy: false, // Allow cross-origin images/PDFs for previews
 }));
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  process.env.CLIENT_URL,
-].filter(Boolean) as string[];
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [process.env.CLIENT_URL].filter(Boolean) as string[]
+  : ['http://localhost:5173', 'http://localhost:3000', process.env.CLIENT_URL].filter(Boolean) as string[];
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -56,7 +55,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Serve local uploads folder statically for fallback mode
-app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../../uploads'), {
+  maxAge: '1d',
+}));
 
 // Enforce Global API rate limiting on standard routes
 app.use('/api', globalLimiter);
@@ -84,7 +85,15 @@ app.use('/api/profile', protect as any, (req: any, res: any) => {
 // Serve built frontend assets statically if they exist on disk
 const clientDistPath = path.join(__dirname, '../../client/dist');
 if (fs.existsSync(clientDistPath)) {
-  app.use(express.static(clientDistPath));
+  app.use(express.static(clientDistPath, {
+    maxAge: '1y',
+    immutable: true,
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    }
+  }));
 }
 
 // 5. 404 Catch-All Fallback & SPA Client Fallback

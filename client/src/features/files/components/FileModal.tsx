@@ -2,6 +2,7 @@ import { X, Download, ExternalLink, Calendar, User, Layout } from 'lucide-react'
 import { IFile } from '../api/fileApi.js';
 import FilePreview from './FilePreview.js';
 import { formatFileSize } from './FileCard.js';
+import { resolveAssetUrl } from '../../../lib/utils.js';
 
 interface FileModalProps {
   isOpen: boolean;
@@ -13,9 +14,7 @@ export default function FileModal({ isOpen, onClose, file }: FileModalProps) {
   if (!isOpen || !file) return null;
 
   // Safe file URL resolution
-  const resolvedUrl = file.fileUrl.startsWith('http')
-    ? file.fileUrl
-    : `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}${file.fileUrl}`;
+  const resolvedUrl = resolveAssetUrl(file.fileUrl);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center animate-in fade-in duration-200">

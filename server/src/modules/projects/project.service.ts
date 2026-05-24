@@ -33,7 +33,7 @@ export const createProject = async (data: any, ownerId: string, workspaceId: str
     key: saved.key,
   });
 
-  return saved;
+  return (await saved.populate('owner', 'name email avatar')).populate('members', 'name email avatar');
 };
 
 /**

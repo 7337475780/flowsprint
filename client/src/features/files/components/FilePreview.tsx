@@ -1,7 +1,7 @@
 import { Download, FileText, ExternalLink } from 'lucide-react';
 import { IFile } from '../api/fileApi.js';
 import { formatFileSize } from './FileCard.js';
-import { cn } from '../../../lib/utils.js';
+import { cn, resolveAssetUrl } from '../../../lib/utils.js';
 
 interface FilePreviewProps {
   file: IFile;
@@ -10,9 +10,7 @@ interface FilePreviewProps {
 
 export default function FilePreview({ file, className }: FilePreviewProps) {
   // Safe URL resolution
-  const resolvedUrl = file.fileUrl.startsWith('http')
-    ? file.fileUrl
-    : `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}${file.fileUrl}`;
+  const resolvedUrl = resolveAssetUrl(file.fileUrl);
 
   // Image Preview Renderer
   if (file.fileType === 'image') {

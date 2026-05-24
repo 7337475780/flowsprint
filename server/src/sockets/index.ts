@@ -17,13 +17,13 @@ export interface ActiveUser {
 const connectedUsers = new Map<string, ActiveUser>();
 
 export const initSocket = (server: any) => {
+  const allowedOrigins = process.env.NODE_ENV === 'production'
+    ? [process.env.CLIENT_URL].filter(Boolean) as string[]
+    : ['http://localhost:5173', 'http://localhost:3000', process.env.CLIENT_URL].filter(Boolean) as string[];
+
   io = new Server(server, {
     cors: {
-      origin: [
-        'http://localhost:5173',
-        'http://localhost:3000',
-        process.env.CLIENT_URL,
-      ].filter(Boolean) as string[],
+      origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     },
@@ -37,7 +37,7 @@ export const initSocket = (server: any) => {
         return next(new Error('Authentication failed: Missing token'));
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as any;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || process.env.JWT_ACCESS_SECRET || 'secret') as any;
       const user = await User.findById(decoded.id || decoded._id).select('-password');
       if (!user) {
         return next(new Error('Authentication failed: User not found'));

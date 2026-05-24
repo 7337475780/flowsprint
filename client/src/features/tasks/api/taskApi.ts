@@ -72,11 +72,10 @@ export interface PaginatedTasksResponse {
   success: boolean;
   message: string;
   data: {
-    data: Task[];
+    tasks: Task[];
     total: number;
     page: number;
-    limit: number;
-    totalPages: number;
+    pages: number;
   };
 }
 
@@ -104,8 +103,13 @@ export interface TaskStatsResponse {
  * Get paginated, sorted and filtered task lists.
  */
 export const getTasks = async (params?: Record<string, any>): Promise<PaginatedTasksResponse['data']> => {
-  const { data } = await api.get<PaginatedTasksResponse>('/tasks', { params });
-  return data.data;
+  const { data } = await api.get<any>('/tasks', { params });
+  return {
+    tasks: data.data.data,
+    total: data.data.total,
+    page: data.data.page,
+    pages: data.data.totalPages,
+  };
 };
 
 /**
@@ -140,19 +144,27 @@ export const deleteTask = async (id: string): Promise<void> => {
 };
 
 /**
- * Quick status column transition.
+ * Move a task status and optionally order position.
  */
-export const updateTaskStatus = async (id: string, status: string): Promise<Task> => {
-  const { data } = await api.patch<TaskResponse>(`/tasks/${id}/status`, { status });
+export const moveTask = async (id: string, status: string, position?: number): Promise<Task> => {
+  const { data } = await api.patch<TaskResponse>(`/tasks/${id}/move`, { status, position });
   return data.data;
 };
 
 /**
- * Drag & Drop coordinate reordering rank shifting.
+ * Quick status column transition (fallback wrapper around moveTask).
  */
-export const reorderTasks = async (id: string, status: string, position: number): Promise<Task> => {
-  const { data } = await api.patch<TaskResponse>(`/tasks/${id}/reorder`, { status, position });
-  return data.data;
+export const updateTaskStatus = async (id: string, status: string): Promise<Task> => {
+  return await moveTask(id, status);
+};
+
+/**
+ * Drag & Drop batch task reordering.
+ */
+export const reorderTasks = async (
+  reorders: { taskId: string; status: Task['status']; order: number }[]
+): Promise<void> => {
+  await api.patch('/tasks/reorder', { reorders });
 };
 
 /**

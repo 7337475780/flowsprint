@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { X } from 'lucide-react';
+import { X, Calendar } from 'lucide-react';
 import { cn } from '../../../lib/utils.js';
 import type { Task, TaskInput } from '../api/taskApi.js';
 import { useProjectsQuery, useProjectDetailsQuery } from '../../projects/hooks/useProjects.js';
@@ -54,17 +54,18 @@ export default function TaskModal({ isOpen, onClose, onSubmit, task }: TaskModal
   });
 
   const watchedProjectId = watch('projectId');
+  const currentProjectId = watchedProjectId || (isEdit ? task?.project?._id : '');
 
   // Query projects for Project Selector
   const { data: projectsData } = useProjectsQuery({ limit: 100 });
-  const projectsList = projectsData?.data ?? [];
+  const projectsList = (projectsData as any)?.projects ?? projectsData?.data ?? [];
 
   // Query detailed project to get the members
-  const { data: selectedProject } = useProjectDetailsQuery(watchedProjectId);
+  const { data: selectedProject } = useProjectDetailsQuery(currentProjectId || '');
   const assigneesList = selectedProject?.members ?? [];
 
   // Query sprints of the selected project
-  const { data: sprintsData } = useSprints({ project: watchedProjectId, limit: 100 });
+  const { data: sprintsData } = useSprints({ project: currentProjectId || '', limit: 100 });
   const sprintsList = sprintsData?.sprints ?? [];
 
   // Set default values when editing triggers
@@ -199,7 +200,7 @@ export default function TaskModal({ isOpen, onClose, onSubmit, task }: TaskModal
                 className="w-full px-3 py-2.5 text-sm rounded-lg border bg-background outline-none transition-all focus:ring-2 disabled:opacity-50"
               >
                 <option value="">Select Project</option>
-                {projectsList.map((p) => (
+                {projectsList.map((p: any) => (
                   <option key={p._id} value={p._id}>
                     {p.name} [{p.key}]
                   </option>
@@ -213,7 +214,7 @@ export default function TaskModal({ isOpen, onClose, onSubmit, task }: TaskModal
                 Agile Sprint
               </label>
               <select
-                disabled={!watchedProjectId}
+                disabled={!currentProjectId}
                 {...register('sprintId')}
                 className="w-full px-3 py-2.5 text-sm rounded-lg border bg-background outline-none transition-all focus:ring-2 disabled:opacity-50"
               >
@@ -234,7 +235,7 @@ export default function TaskModal({ isOpen, onClose, onSubmit, task }: TaskModal
                 Assign User
               </label>
               <select
-                disabled={!watchedProjectId}
+                disabled={!currentProjectId}
                 {...register('assignee')}
                 className="w-full px-3 py-2.5 text-sm rounded-lg border bg-background outline-none transition-all focus:ring-2 disabled:opacity-50"
               >
@@ -285,11 +286,18 @@ export default function TaskModal({ isOpen, onClose, onSubmit, task }: TaskModal
               <label className="text-3xs font-extrabold uppercase tracking-widest block text-muted-foreground">
                 Due Date
               </label>
-              <input
-                type="date"
-                {...register('dueDate')}
-                className="w-full px-3 py-2 text-sm rounded-lg border bg-background outline-none focus:ring-2"
-              />
+              <div className="relative">
+                <input
+                  type="date"
+                  {...register('dueDate')}
+                  className={cn(
+                    "w-full px-3 py-2 pr-10 text-sm rounded-lg border bg-background outline-none transition-all cursor-pointer focus:ring-2",
+                    "focus:border-primary focus:ring-primary/20",
+                    errors.dueDate && "border-destructive focus:ring-destructive/10"
+                  )}
+                />
+                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none transition-colors duration-200" />
+              </div>
             </div>
           </div>
 

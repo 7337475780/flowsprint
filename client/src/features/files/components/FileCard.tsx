@@ -5,7 +5,7 @@ import {
 import { useAuthStore } from '../../../store/authStore.js';
 import { useDeleteFileMutation } from '../hooks/useFiles.js';
 import { IFile } from '../api/fileApi.js';
-import { cn } from '../../../lib/utils.js';
+import { cn, resolveAssetUrl } from '../../../lib/utils.js';
 
 interface FileCardProps {
   file: IFile;
@@ -72,9 +72,7 @@ export default function FileCard({ file, onPreview }: FileCardProps) {
   };
 
   // Safe file path resolution
-  const resolvedUrl = file.fileUrl.startsWith('http')
-    ? file.fileUrl
-    : `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000'}${file.fileUrl}`;
+  const resolvedUrl = resolveAssetUrl(file.fileUrl);
 
   return (
     <div

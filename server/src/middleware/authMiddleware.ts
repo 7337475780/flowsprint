@@ -43,7 +43,7 @@ export const protect = async (
     // Verify token payload
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || 'dev_jwt_secret_flowsprint_token'
+      process.env.JWT_SECRET || process.env.JWT_ACCESS_SECRET || 'dev_jwt_secret_flowsprint_token'
     ) as { id: string };
 
     // Fetch matching user from database excluding hashed password

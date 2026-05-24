@@ -266,7 +266,7 @@ export default function TasksPage() {
         {tasksData && (
           <TaskPagination
             page={page}
-            totalPages={tasksData.totalPages}
+            totalPages={tasksData.pages}
             onPageChange={setPage}
           />
         )}
@@ -285,7 +285,7 @@ export default function TasksPage() {
     );
   };
 
-  const tasks = tasksData?.data ?? [];
+  const tasks = tasksData?.tasks ?? [];
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

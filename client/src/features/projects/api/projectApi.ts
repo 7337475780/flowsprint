@@ -29,6 +29,7 @@ export interface ProjectInput {
   startDate?: string;
   dueDate?: string;
   tags?: string[];
+  members?: string[];
 }
 
 export interface PaginatedProjectsResponse {

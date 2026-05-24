@@ -34,28 +34,29 @@ router.get('/stats/:projectId', taskController.getTaskStats);
 router.get('/:id', taskController.getTaskById);
 
 /**
- * @route   PATCH /api/tasks/:id
+ * @route   PUT /api/tasks/:id
  * @desc    Update task details (partial)
  */
+router.put('/:id', taskValidation.validateUpdateTask, taskController.updateTask);
 router.patch('/:id', taskValidation.validateUpdateTask, taskController.updateTask);
 
 /**
- * @route   DELETE /api/tasks/:id
- * @desc    Remove a task
+ * @route   PATCH /api/tasks/:id/move
+ * @desc    Move task status and order
  */
-router.delete('/:id', taskController.deleteTask);
+router.patch('/:id/move', taskController.moveTask);
 
 /**
- * @route   PATCH /api/tasks/:id/status
- * @desc    Quick transition task status
- */
-router.patch('/:id/status', taskController.updateTaskStatus);
-
-/**
- * @route   PATCH /api/tasks/:id/reorder
+ * @route   PATCH /api/tasks/reorder
  * @desc    Reorder tasks drag and drop column shifting
  */
-router.patch('/:id/reorder', taskValidation.validateReorderTasks, taskController.reorderTasks);
+router.patch('/reorder', taskValidation.validateReorderTasks, taskController.reorderTasks);
+
+/**
+ * @route   PATCH /api/tasks/:id/subtasks/:subtaskId
+ * @desc    Toggle a specific subtask checklist item
+ */
+router.patch('/:id/subtasks/:subtaskId', taskController.toggleSubtask);
 
 /**
  * @route   POST /api/tasks/:id/comments
@@ -64,9 +65,9 @@ router.patch('/:id/reorder', taskValidation.validateReorderTasks, taskController
 router.post('/:id/comments', taskValidation.validateComment, taskController.addComment);
 
 /**
- * @route   PATCH /api/tasks/:id/subtasks/:subtaskId
- * @desc    Toggle a specific subtask checklist item
+ * @route   DELETE /api/tasks/:id
+ * @desc    Remove a task
  */
-router.patch('/:id/subtasks/:subtaskId', taskController.toggleSubtask);
+router.delete('/:id', taskController.deleteTask);
 
 export default router;

@@ -4,18 +4,33 @@ import { useNotificationStore } from '../features/notifications/store/notificati
 
 let socket: Socket | null = null;
 
-const SOCKET_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 
+  (import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:5000/api')).replace(/\/api\/?$/, '');
 
 /**
  * Connect and authenticate with the Socket.io server using JWT.
  * Configures real-time listener handlers to sync with global Zustand store.
  */
-export const initSocket = (token: string) => {
-  if (socket?.connected) return;
+let lastToken: string | null = null;
 
-  socket = io(SOCKET_URL, {
+export const initSocket = (token: string) => {
+  if (socket && lastToken === token) return;
+
+  if (socket) {
+    socket.disconnect();
+  }
+
+  lastToken = token;
+  const host = SOCKET_URL || (typeof window !== 'undefined' ? window.location.origin : '');
+
+  socket = io(host, {
     auth: { token },
-    transports: ['websocket', 'polling'],
+    transports: ['websocket'],
+    secure: import.meta.env.PROD ? true : undefined,
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    reconnectionAttempts: Infinity,
   });
 
   socket.on('connect', () => {

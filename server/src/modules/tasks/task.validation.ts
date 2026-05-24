@@ -69,19 +69,18 @@ export const validateUpdateTask = (req: Request, res: Response, next: NextFuncti
 };
 
 export const validateReorderTasks = (req: Request, res: Response, next: NextFunction): void => {
-  const result = reorderTasksSchema.safeParse(req.body);
-  if (!result.success) {
-    res.status(400).json({
-      success: false,
-      message: 'Validation failed',
-      errors: result.error.errors.map((err) => ({
-        field: err.path.join('.'),
-        message: err.message,
-      })),
-    });
+  console.log("REORDER PAYLOAD:", req.body);
+  const { reorders } = req.body;
+  if (!reorders || !Array.isArray(reorders)) {
+    res.status(400).json({ message: "Invalid reorder payload" });
     return;
   }
-  req.body = result.data;
+  for (const item of reorders) {
+    if (!item || !item.taskId || typeof item.order !== 'number') {
+      res.status(400).json({ message: "Invalid reorder payload" });
+      return;
+    }
+  }
   next();
 };
 

@@ -166,7 +166,7 @@ export default function ProjectsPage() {
 
     return (
       <div className="space-y-6">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 glassmorphism">
           {projectsList.map((project) => (
             <ProjectCard
               key={project._id}
@@ -281,7 +281,7 @@ export default function ProjectsPage() {
   const projects = data?.data ?? [];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 bg-gradient-to-b from-primary/5 via-background/10 to-background/5 glassmorphism">
       {/* Page Header */}
       <PageHeader
         title="Projects"
@@ -302,7 +302,7 @@ export default function ProjectsPage() {
       <ProjectStats stats={stats} />
 
       {/* Filters & Layout Toggles toolbar */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-card p-4 border rounded-2xl shadow-3xs">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-card p-4 border rounded-2xl shadow-3xs glassmorphism">
         <div className="flex-1 max-w-md">
           <ProjectSearch
             initialValue={search}

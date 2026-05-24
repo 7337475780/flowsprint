@@ -9,6 +9,7 @@ const router = Router();
  */
 router.get('/', (req: Request, res: Response) => {
   res.status(200).json({
+    status: 'ok',
     success: true,
     message: 'Server running',
   });

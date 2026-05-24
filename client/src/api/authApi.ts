@@ -68,8 +68,8 @@ export const register = async (payload: RegisterInput): Promise<AuthResponse> =>
  * Fetch the currently authenticated user's profile.
  */
 export const getCurrentUser = async (): Promise<User> => {
-  const { data } = await api.get<{ success: boolean; data: User }>('/auth/me');
-  return data.data;
+  const { data } = await api.get<{ success: boolean; data: { user: User } }>('/auth/me');
+  return data.data.user;
 };
 
 /**

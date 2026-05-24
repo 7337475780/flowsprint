@@ -5,6 +5,9 @@ import * as z from 'zod';
 import { X } from 'lucide-react';
 import { cn } from '../../../lib/utils.js';
 import type { Project, ProjectInput } from '../api/projectApi.js';
+import { useQuery } from '@tanstack/react-query';
+import api from '../../../api/axios.js';
+import { useAuthStore } from '../../../store/authStore.js';
 
 const projectSchema = z.object({
   name: z.string().min(1, 'Project name is required').min(3, 'Must be at least 3 characters'),
@@ -19,6 +22,7 @@ const projectSchema = z.object({
   startDate: z.string().optional(),
   dueDate: z.string().optional(),
   tagsInput: z.string().optional(),
+  members: z.array(z.string()).optional(),
 });
 
 type ProjectFormValues = z.infer<typeof projectSchema>;
@@ -46,8 +50,23 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
     defaultValues: {
       status: 'planning',
       priority: 'medium',
+      members: [],
     },
   });
+
+  const user = useAuthStore((s) => s.user);
+  const currentWorkspaceId = (user as any)?.currentWorkspace;
+
+  const { data: workspaceData } = useQuery({
+    queryKey: ['workspace-details', currentWorkspaceId],
+    queryFn: async () => {
+      const { data } = await api.get(`/workspaces/${currentWorkspaceId}`);
+      return data.data;
+    },
+    enabled: !!currentWorkspaceId,
+  });
+
+  const workspaceMembers = (workspaceData?.members ?? []) as any[];
 
   // React to project editing triggers
   useEffect(() => {
@@ -61,6 +80,7 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
         startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : '',
         dueDate: project.dueDate ? new Date(project.dueDate).toISOString().split('T')[0] : '',
         tagsInput: project.tags ? project.tags.join(', ') : '',
+        members: project.members ? project.members.map((m: any) => typeof m === 'object' ? m._id : m.toString()) : [],
       });
     } else {
       reset({
@@ -72,6 +92,7 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
         startDate: '',
         dueDate: '',
         tagsInput: '',
+        members: [],
       });
     }
   }, [project, reset]);
@@ -91,6 +112,7 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
             .map((t) => t.trim())
             .filter(Boolean)
         : [],
+      members: values.members || [],
     };
     await onSubmit(payload);
   };
@@ -243,6 +265,38 @@ export default function ProjectModal({ isOpen, onClose, onSubmit, project }: Pro
                 placeholder="web, backend"
                 className="w-full px-3 py-2 text-sm rounded-lg border bg-background outline-none focus:ring-2"
               />
+            </div>
+
+            {/* Team Members Assignment Checkboxes */}
+            <div className="space-y-1.5 col-span-3">
+              <label className="text-3xs font-extrabold uppercase tracking-widest block text-muted-foreground">
+                Assign Teammates
+              </label>
+              <div className="grid grid-cols-2 gap-2 max-h-[150px] overflow-y-auto pr-1 custom-scrollbar border rounded-lg p-2 bg-background">
+                {workspaceMembers.length === 0 ? (
+                  <p className="text-3xs text-muted-foreground italic col-span-2 p-1">No workspace members found.</p>
+                ) : (
+                  workspaceMembers.map((member) => (
+                    <label
+                      key={member._id}
+                      className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-secondary/40 cursor-pointer select-none transition-colors border border-transparent hover:border-border/30 text-2xs"
+                    >
+                      <input
+                        type="checkbox"
+                        value={member._id}
+                        {...register('members')}
+                        className="rounded border-slate-300 dark:border-slate-700 text-primary focus:ring-primary h-3.5 w-3.5"
+                      />
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <div className="h-5 w-5 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[9px] uppercase shrink-0">
+                          {member.name.split(' ').map((n: any) => n[0]).slice(0, 2).join('')}
+                        </div>
+                        <span className="truncate font-medium text-foreground">{member.name}</span>
+                      </div>
+                    </label>
+                  ))
+                )}
+              </div>
             </div>
           </div>
 

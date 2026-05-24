@@ -36,6 +36,29 @@ export const createTaskValidator = [
 ];
 
 /**
+ * Validation rules for reordering a task.
+ */
+export const reorderTaskValidator = [
+  body('reorders')
+    .isArray({ min: 1 })
+    .withMessage('Reorders must be a non-empty array'),
+  body('reorders.*.taskId')
+    .notEmpty()
+    .withMessage('Each reorder must contain a taskId')
+    .isMongoId()
+    .withMessage('taskId must be a valid Mongo ID'),
+  body('reorders.*.status')
+    .notEmpty()
+    .isIn(['backlog', 'todo', 'in-progress', 'review', 'done'])
+    .withMessage('status must be one of backlog, todo, in-progress, review, done'),
+  body('reorders.*.order')
+    .isNumeric()
+    .withMessage('order must be a number'),
+  validateRequest,
+];
+
+
+/**
  * Validation rules list for updating existing task parameters.
  */
 export const updateTaskValidator = [

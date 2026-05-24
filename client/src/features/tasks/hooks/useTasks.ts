@@ -155,7 +155,7 @@ export function useUpdateTaskStatusGeneralMutation() {
       queryClient.setQueriesData<any>({ queryKey: ['tasks-paginated'] }, (old: any) => {
         if (!old) return old;
         const isArray = Array.isArray(old);
-        const taskList = isArray ? old : old.data;
+        const taskList = isArray ? old : old.tasks;
         if (!Array.isArray(taskList)) return old;
 
         const updatedList = taskList.map((t: any) => {
@@ -165,7 +165,7 @@ export function useUpdateTaskStatusGeneralMutation() {
           return t;
         });
 
-        return isArray ? updatedList : { ...old, data: updatedList };
+        return isArray ? updatedList : { ...old, tasks: updatedList };
       });
 
       // Optimistically update sprint-details
@@ -221,9 +221,9 @@ export function useReorderTasksMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, status, position }: { id: string; status: string; position: number }) =>
-      reorderTasks(id, status, position),
-    onMutate: async ({ id, status, position }) => {
+    mutationFn: (reorders: { taskId: string; status: any; order: number }[]) =>
+      reorderTasks(reorders),
+    onMutate: async (reorders) => {
       await queryClient.cancelQueries({ queryKey: ['tasks-paginated'] });
       await queryClient.cancelQueries({ queryKey: ['sprints'] });
       await queryClient.cancelQueries({ queryKey: ['sprint-details'] });
@@ -233,17 +233,18 @@ export function useReorderTasksMutation() {
       queryClient.setQueriesData<any>({ queryKey: ['tasks-paginated'] }, (old: any) => {
         if (!old) return old;
         const isArray = Array.isArray(old);
-        const taskList = isArray ? old : old.data;
+        const taskList = isArray ? old : old.tasks;
         if (!Array.isArray(taskList)) return old;
 
         const updatedList = taskList.map((t: any) => {
-          if (t._id === id) {
-            return { ...t, status, position };
+          const matchingReorder = reorders.find((r) => r.taskId === t._id);
+          if (matchingReorder) {
+            return { ...t, status: matchingReorder.status, position: matchingReorder.order };
           }
           return t;
         });
 
-        return isArray ? updatedList : { ...old, data: updatedList };
+        return isArray ? updatedList : { ...old, tasks: updatedList };
       });
 
       return { previousTasksQueries };
@@ -257,10 +258,9 @@ export function useReorderTasksMutation() {
       const msg = err?.response?.data?.message || 'Failed to reorder task';
       toast.error(msg);
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks-paginated'] });
       queryClient.invalidateQueries({ queryKey: ['tasks-stats-overview'] });
-      queryClient.invalidateQueries({ queryKey: ['task-details', data._id] });
       queryClient.invalidateQueries({ queryKey: ['sprints'] });
       queryClient.invalidateQueries({ queryKey: ['sprint-details'] });
     },
