@@ -128,7 +128,7 @@
     background: radial-gradient(125% 125% at 50% 0%, #0d0e13 0%, #040406 100%) !important;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.6;
     overflow: hidden;
     height: 100%;
@@ -137,21 +137,21 @@
   /* ── Typography scale ── */
   h1 {
     font-family: 'Outfit', 'Inter', sans-serif;
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 700;
     line-height: 1.25;
     letter-spacing: -0.02em;
   }
   h2 {
     font-family: 'Outfit', 'Inter', sans-serif;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     line-height: 1.3;
     letter-spacing: -0.01em;
   }
   h3 {
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -178,7 +178,7 @@
   textarea,
   select {
     font-family: inherit;
-    font-size: 14px;
+    font-size: 15px;
     height: var(--input-h);
     padding: 0 12px;
     background: var(--surface-overlay);
@@ -290,9 +290,10 @@
 
 /* ── Section heading (replaces ad-hoc text-3xs uppercase patterns) ── */
 .section-label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
 }

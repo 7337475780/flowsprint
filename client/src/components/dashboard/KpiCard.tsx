@@ -61,14 +61,12 @@ export default function KpiCard({
       {/* Subtle hover glow backdrop */}
       <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-transparent to-emerald-500/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-      {/* ── Row 1: title + icon ── */}
       <div className="flex items-start justify-between gap-3 w-full min-w-0">
         <span
           className={cn(
-            'leading-tight select-none block flex-1 min-w-0 truncate',
-            'text-[11px] font-bold uppercase tracking-[0.08em]',
-            'text-muted-foreground',
-            'hyphens-none break-normal'
+            'leading-tight select-none block flex-1 min-w-0',
+            'text-xs font-bold uppercase tracking-wider',
+            'text-muted-foreground'
           )}
           title={title}
         >

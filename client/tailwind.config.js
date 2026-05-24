@@ -59,9 +59,9 @@ export default {
       // ─── Custom micro typography scale ───────────────────────────────
       // text-4xs (8px), text-3xs (9px), text-2xs (10px) used across 30+ components
       fontSize: {
-        '4xs': ['0.5rem',    { lineHeight: '0.75rem' }],   // 8px / 12px
-        '3xs': ['0.5625rem', { lineHeight: '0.875rem' }],  // 9px / 14px
-        '2xs': ['0.625rem',  { lineHeight: '1rem' }],      // 10px / 16px
+        '4xs': ['0.75rem',    { lineHeight: '1rem' }],      // 12px / 16px
+        '3xs': ['0.75rem',    { lineHeight: '1rem' }],      // 12px / 16px
+        '2xs': ['0.8125rem',  { lineHeight: '1.125rem' }],  // 13px / 18px
       },
       // ─── Custom shadow scale ─────────────────────────────────────────
       // shadow-xs / shadow-2xs / shadow-3xs used across 20+ components

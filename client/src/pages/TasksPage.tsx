@@ -307,15 +307,15 @@ export default function TasksPage() {
       {projectId && <TaskStats stats={stats} />}
 
       {/* Toolbar filters row */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-card p-4 border rounded-2xl shadow-3xs">
-        <div className="flex-1 max-w-md">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between bg-card p-4 border rounded-2xl shadow-3xs">
+        <div className="w-full lg:w-72 shrink-0">
           <TaskSearch
             initialValue={search}
             onSearch={handleSearch}
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto lg:justify-end">
           <TaskFilters
             projectId={projectId}
             sprintId={sprintId}
@@ -332,11 +332,11 @@ export default function TasksPage() {
           />
 
           {/* Grid vs Board selector */}
-          <div className="flex items-center gap-1 border rounded-lg bg-secondary/50 p-1 self-stretch md:self-auto">
+          <div className="flex items-center gap-1 border rounded-lg bg-secondary/50 p-1 self-stretch lg:self-auto">
             <button
               onClick={() => setViewMode('list')}
               className={cn(
-                'flex-1 md:flex-initial p-1.5 rounded-md transition-all flex items-center justify-center gap-1.5 text-xs font-semibold',
+                'flex-1 lg:flex-initial p-1.5 rounded-md transition-all flex items-center justify-center gap-1.5 text-xs font-semibold',
                 viewMode === 'list'
                   ? 'bg-card text-foreground shadow-3xs border'
                   : 'text-muted-foreground hover:text-foreground'
@@ -349,7 +349,7 @@ export default function TasksPage() {
             <button
               onClick={() => setViewMode('board')}
               className={cn(
-                'flex-1 md:flex-initial p-1.5 rounded-md transition-all flex items-center justify-center gap-1.5 text-xs font-semibold',
+                'flex-1 lg:flex-initial p-1.5 rounded-md transition-all flex items-center justify-center gap-1.5 text-xs font-semibold',
                 viewMode === 'board'
                   ? 'bg-card text-foreground shadow-3xs border'
                   : 'text-muted-foreground hover:text-foreground'

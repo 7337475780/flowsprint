@@ -1,80 +1,103 @@
 # FlowSprint
 
-FlowSprint is a high-performance, collaborative project management SaaS designed to streamline team workflows, task tracking, and sprint planning. It draws inspiration from industry-leading platforms like Jira, ClickUp, and GoodDay, while prioritizing a streamlined, elegant user experience tailored for modern, agile product teams.
+A collaborative agile project management and sprint tracking platform. It is built as a monorepo containing a React client and an Express backend server.
 
-## Why FlowSprint?
+## Features
 
-Traditional project management tools often suffer from two extremes: they are either overly complex enterprise beasts that slow engineers down, or simple kanban boards that lack the power to plan sprints and track analytics. FlowSprint bridges this gap. It's built for fast-moving startups that need high-fidelity tracking, dynamic view switching (Kanban, List, Backlog), and rich collaborative features, without the administrative friction.
+*   **Sprint Planning**: Create sprints, define story points, track progress, and manage the sprint lifecycle (planned, active, completed, cancelled).
+*   **Kanban Board**: Drag-and-drop task board with backlog, todo, in-progress, review, and done lanes.
+*   **Real-time Collaboration**: User online/offline presence tracking and comment typing indicators using Socket.io.
+*   **Analytics**: Sprint velocity tracking and daily burndown charts.
+*   **File Attachments**: Support for uploading and previewing attachments using Cloudinary.
+*   **Security**: JWT-based authentication, HTTP-only cookie management, CORS configurations, and API rate limiting.
 
-## Technical Stack Overview
+## Tech Stack
 
-FlowSprint is architected as a robust monorepo, pairing a high-performance Express server with a dynamic, reactive React frontend.
+### Frontend
+- React 18
+- Vite
+- TypeScript
+- TailwindCSS
+- Zustand (client state)
+- TanStack Query (server state caching)
+- React Hook Form + Zod
 
-### Frontend (`/client`)
-- **Core**: React + Vite + TypeScript (for blistering fast dev feedback and strong typing)
-- **Styling**: TailwindCSS (for clean, responsive, and utility-driven UI styling)
-- **Design & UI**: Custom handcrafted atomic components built with accessibility and dark mode defaults
-- **Routing**: React Router (client-side routing with clean layout boundaries)
-- **State Management**: Zustand (lightweight, decoupled global state for UI and user preferences)
-- **Server Cache**: TanStack Query / React Query (type-safe cache management, automated refetching, and pagination handling)
-- **Forms**: React Hook Form + Zod (declarative validation with robust runtime type checking)
+### Backend
+- Node.js & Express
+- MongoDB & Mongoose
+- Socket.io
+- Cloudinary SDK
+- Zod (request validation)
 
-### Backend (`/server`)
-- **Core**: Node.js + Express + TypeScript
-- **Database**: MongoDB + Mongoose (schemaless storage with schema enforcement at application level)
-- **Security & Integrity**: 
-  - Helmet (secure HTTP headers)
-  - CORS (cross-origin resource sharing configuration)
-  - Express Rate Limit (API rate limiting to mitigate DDoS/brute-force attacks)
-  - Cookie Parser (secure, HTTP-only cookie management)
-- **Validation**: Zod schema validators for requests payload structure
-- **Logging**: Morgan for HTTP request logging paired with a custom Winston-based console logger
-- **Error Handling**: Centrally managed global error handling middleware with unified response contracts
+## Directory Structure
 
----
-
-## Monorepo Directory Structure
-
-```
+```text
 FlowSprint/
- ├── package.json         # Root workspace manager
- ├── .gitignore
- ├── README.md            # Root documentation
- ├── client/              # Frontend client application
- └── server/              # Backend Express API
+├── client/                 # React frontend
+│   ├── src/
+│   │   ├── api/            # API clients & base configurations
+│   │   ├── components/     # Reusable UI elements
+│   │   ├── features/       # Feature-specific code (auth, sprints, tasks)
+│   │   └── store/          # Zustand stores
+├── server/                 # Express backend
+│   ├── src/
+│   │   ├── middleware/     # Auth, error handling, rate limits
+│   │   ├── models/         # Mongoose schemas
+│   │   ├── modules/        # Modular routers and controllers
+│   │   └── sockets/        # Socket handlers
 ```
 
----
-
-## Architecture Philosophy
-
-- **Feature-Based Scalability**: The client uses a feature-based folder structure (`features/`) where logical domains (like `tasks`, `sprints`, `users`) contain their own components, state hooks, and API endpoints, keeping them clean and decoupled from general app assets.
-- **Fail-Fast Environment Validation**: The backend uses Zod schema-validated configurations at startup. If critical variables like database URIs or session secrets are missing, the server halts immediately with explicit error logs instead of running in a half-configured state.
-- **Unified API Contracts**: Standardized API response wrappers (`sendSuccess` and `sendError`) guarantee that the client always receives predictable responses.
-- **Lean State Separation**: Zustand is used strictly for client-side UI states (like active sidebar toggle or dark-mode preferences), while server data is completely managed by TanStack Query, eliminating the anti-pattern of duplicating server cache in a global store.
-
----
-
-## Getting Started (Local Setup)
+## Local Development
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- npm (v9 or higher)
+- Node.js (v18+)
+- npm (v9+)
+- MongoDB (local or Atlas)
 
-### Setup Steps
-1. **Clone and Install dependencies**
+### Setup
+
+1. **Install Dependencies**
+   Run from the root directory:
    ```bash
-   cd flowsprint
    npm install
    ```
 
 2. **Configure Environment Variables**
-   - Create a `.env` file in the `/server` directory using `/server/.env.example` as a baseline.
+   Create a `.env` file in the `server` directory using `server/.env.example` as a template:
+   ```env
+   PORT=5000
+   NODE_ENV=development
+   MONGO_URI=mongodb://localhost:27017/flowsprint
+   JWT_SECRET=your_jwt_secret
+   CLIENT_URL=http://localhost:5173
 
-3. **Run in Development Mode**
+   # Optional Cloudinary Credentials
+   CLOUDINARY_CLOUD_NAME=your_cloud_name
+   CLOUDINARY_API_KEY=your_api_key
+   CLOUDINARY_API_SECRET=your_api_secret
+   ```
+
+3. **Database Credentials Warning**
+   Never hardcode the `MONGO_URI` connection string (especially with production Atlas passwords) in the repository. All seeding and script files load `MONGO_URI` dynamically from the environment variables.
+
+4. **Run the Application**
+   Start both the backend and frontend servers in development mode:
    ```bash
    npm run dev
    ```
-   This will concurrently spin up:
-   - Client dev server: `http://localhost:5173`
-   - Server dev server: `http://localhost:5000`
+   - Client runs on: `http://localhost:5173`
+   - Server runs on: `http://localhost:5000`
+
+## Production Deployment
+
+### Build
+To build both packages for production:
+```bash
+npm run build
+```
+- Compiles the backend into `server/dist`
+- Bundles the frontend static assets into `client/dist`
+
+### Serving Static Files
+In production mode (`NODE_ENV=production`), the Express server is configured to serve the frontend client directly from the built `client/dist` folder. 
+Any request that does not match an `/api` endpoint is served the static `index.html` file, supporting client-side routing. This allows deploying the entire monorepo on a single dyno or service (running `node server/dist/server.js`).

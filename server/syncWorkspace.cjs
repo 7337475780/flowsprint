@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
+const path = require('path');
+require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
-const MONGO_URI = 'mongodb://flowsprint_admin:flowsprint_admin@ac-bw0itex-shard-00-00.qdypedp.mongodb.net:27017,ac-bw0itex-shard-00-01.qdypedp.mongodb.net:27017,ac-bw0itex-shard-00-02.qdypedp.mongodb.net:27017/flowsprint?replicaSet=atlas-es5qvx-shard-0&ssl=true&authSource=admin';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/flowsprint';
 
 const userSchema = new mongoose.Schema({
   name: String,

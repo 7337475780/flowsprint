@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
+const path = require('path');
+require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
-const MONGO_URI = 'mongodb+srv://flowsprint_admin:flowsprint_admin@flowsprint.qdypedp.mongodb.net/flowsprint?appName=flowsprint';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/flowsprint';
 
 const userSchema = new mongoose.Schema({
   name: String,
