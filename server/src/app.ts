@@ -33,13 +33,30 @@ app.use(helmet({
   crossOriginResourcePolicy: false, // Allow cross-origin images/PDFs for previews
 }));
 
-const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? [process.env.CLIENT_URL].filter(Boolean) as string[]
-  : ['http://localhost:5173', 'http://localhost:3000', process.env.CLIENT_URL].filter(Boolean) as string[];
+const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.trim().replace(/\/$/, '') : '';
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5174',
+  clientUrl
+].filter(Boolean);
 
 app.use(
   cors({
-    origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like node-fetch, curl, or mobile apps)
+      if (!origin) return callback(null, true);
+
+      const cleanOrigin = origin.trim().replace(/\/$/, '');
+      const isAllowed = allowedOrigins.some(o => o.trim().replace(/\/$/, '') === cleanOrigin);
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
