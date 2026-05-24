@@ -49,10 +49,10 @@ export default function TaskChart({
   return (
     <div className={cn('border bg-card rounded-2xl p-6 shadow-2xs space-y-4 flex flex-col justify-between h-80', className)}>
       <div>
-        <h3 className="font-heading font-extrabold text-sm tracking-tight text-foreground">
+        <h3 className="font-heading font-semibold text-base tracking-tight text-foreground">
           Task Distribution
         </h3>
-        <p className="text-3xs font-extrabold text-muted-foreground uppercase tracking-widest mt-0.5 block">
+        <p className="text-xs text-muted-foreground mt-0.5 block">
           Workload status ratio
         </p>
       </div>
@@ -83,10 +83,10 @@ export default function TaskChart({
           </svg>
           {/* Inner sum card */}
           <div className="absolute text-center leading-none">
-            <span className="text-2xl font-bold font-mono tracking-tight block text-foreground">
+            <span className="text-2xl font-bold tabular-nums tracking-tight block text-foreground">
               {total}
             </span>
-            <span className="text-3xs font-bold uppercase tracking-wider text-muted-foreground block mt-0.5">
+            <span className="text-[11px] leading-tight text-muted-foreground block mt-0.5">
               Tickets
             </span>
           </div>
@@ -95,14 +95,14 @@ export default function TaskChart({
         {/* Status Legends listing */}
         <div className="flex-1 space-y-2.5 w-full">
           {segments.map((seg) => (
-            <div key={seg.label} className="flex justify-between items-center text-xs">
+            <div key={seg.label} className="flex justify-between items-center">
               <div className="flex items-center gap-2 min-w-0">
                 <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: seg.color }} />
-                <span className="text-muted-foreground font-semibold truncate">{seg.label}</span>
+                <span className="text-sm font-medium text-muted-foreground truncate">{seg.label}</span>
               </div>
-              <div className="flex items-center gap-1.5 shrink-0 font-mono text-2xs">
-                <span className="font-extrabold text-foreground">{seg.count}</span>
-                <span className="text-muted-foreground/60">({Math.round(seg.percent)}%)</span>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="text-sm font-mono font-semibold text-foreground">{seg.count}</span>
+                <span className="text-xs text-muted-foreground">({Math.round(seg.percent)}%)</span>
               </div>
             </div>
           ))}

@@ -130,12 +130,12 @@ export default function DashboardPage() {
       {/* ─── Header row — flex-row at all widths ≥ 640px ──────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-6">
         <div className="space-y-1 min-w-0">
-          {/* h1: 24px font-weight 700 per spec */}
-          <h1 className="text-2xl font-bold font-heading tracking-tight text-foreground">
+          {/* h1: 30px font-weight 700 per spec */}
+          <h1 className="text-3xl font-bold font-heading tracking-tight text-foreground">
             {greeting}, {user?.name?.split(' ')[0] ?? 'there'} 👋
           </h1>
           {/* Subtitle max-width 600px prevents overly long lines */}
-          <p className="text-sm text-muted-foreground max-w-[600px] leading-relaxed">
+          <p className="text-sm text-muted-foreground/80 max-w-[600px] leading-relaxed">
             Welcome back to FlowSprint. Here is a real-time snapshot of your workspace's planning, backlogs, and agile velocity.
           </p>
         </div>
@@ -157,9 +157,9 @@ export default function DashboardPage() {
       </div>
 
       {/* ─── KPI Cards ───────────────────────────────────────────────── */}
-      <div className="space-y-3">
-        {/* Section heading: 11px uppercase tracking-[0.1em] — matches spec h3 */}
-        <h2 className="section-label">Workspace Telemetry Snapshots</h2>
+      <div className="space-y-4">
+        {/* Section heading: text-lg font-semibold tracking-tight */}
+        <h2 className="text-lg font-semibold font-heading tracking-tight text-foreground">Workspace Telemetry Snapshots</h2>
         <DashboardGrid variant="kpis">
           {isLoading
             ? Array.from({ length: 6 }).map((_, idx) => <SkeletonCard key={idx} variant="kpi" />)
@@ -168,9 +168,9 @@ export default function DashboardPage() {
       </div>
 
       {/* ─── Analytics & Workload ─────────────────────────────────── */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {/* Section heading: identical style to the KPI heading above */}
-        <h2 className="section-label">Analytics & Workload Streams</h2>
+        <h2 className="text-lg font-semibold font-heading tracking-tight text-foreground">Analytics & Workload Streams</h2>
         <DashboardGrid variant="widgets">
           {/* Donut task chart */}
           {isLoading ? (

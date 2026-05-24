@@ -23,10 +23,10 @@ export default function TeamLoad({ teamData, className }: TeamLoadProps) {
   return (
     <div className={cn('border bg-card rounded-2xl p-6 shadow-2xs space-y-4 flex flex-col justify-between h-80', className)}>
       <div>
-        <h3 className="font-heading font-extrabold text-sm tracking-tight text-foreground">
+        <h3 className="font-heading font-semibold text-base tracking-tight text-foreground">
           Team Capacity Balance
         </h3>
-        <p className="text-3xs font-extrabold text-muted-foreground uppercase tracking-widest mt-0.5 block">
+        <p className="text-xs text-muted-foreground mt-0.5 block">
           Developer resource allocation
         </p>
       </div>
@@ -47,10 +47,10 @@ export default function TeamLoad({ teamData, className }: TeamLoadProps) {
               <li key={member.id} className="flex items-center justify-between gap-4">
                 {/* Avatar and name */}
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="h-7 w-7 rounded-full bg-primary/10 text-primary border flex items-center justify-center text-3xs font-bold shrink-0">
+                  <div className="h-7 w-7 rounded-full bg-primary/10 text-primary border flex items-center justify-center text-[11px] leading-tight font-bold shrink-0">
                     {initials}
                   </div>
-                  <span className="font-semibold text-xs text-foreground truncate block">
+                  <span className="font-semibold text-sm text-foreground truncate block">
                     {member.name}
                   </span>
                 </div>
@@ -66,13 +66,13 @@ export default function TeamLoad({ teamData, className }: TeamLoadProps) {
                       style={{ width: `${member.workload}%` }}
                     />
                   </div>
-                  <span className={cn('font-mono text-3xs font-extrabold w-8 text-right', isHigh ? 'text-rose-500' : 'text-foreground')}>
+                  <span className={cn('text-xs font-semibold tabular-nums w-8 text-right', isHigh ? 'text-rose-500' : 'text-foreground')}>
                     {member.workload}%
                   </span>
                 </div>
 
                 {/* Counter pill */}
-                <span className="bg-secondary border text-foreground text-3xs px-2 py-0.5 rounded font-bold font-mono shrink-0">
+                <span className="bg-secondary border text-foreground text-xs px-2 py-0.5 rounded font-medium tabular-nums shrink-0">
                   {member.activeTasks} tasks
                 </span>
               </li>

@@ -65,8 +65,7 @@ export default function KpiCard({
         <span
           className={cn(
             'leading-tight select-none block flex-1 min-w-0',
-            'text-xs font-bold uppercase tracking-wider',
-            'text-muted-foreground'
+            'text-sm font-medium text-muted-foreground'
           )}
           title={title}
         >
@@ -79,7 +78,7 @@ export default function KpiCard({
 
       {/* ── Row 2: metric value ── */}
       <div className="mt-4 flex-1 min-w-0 w-full">
-        <div className="text-[26px] font-bold font-heading tracking-tight text-foreground leading-none truncate">
+        <div className="text-2xl font-bold font-heading tracking-tight text-foreground leading-none truncate tabular-nums">
           {value}
         </div>
         <div className="mt-2 flex">
@@ -126,7 +125,7 @@ export default function KpiCard({
         </div>
 
         {/* Label block indicator element */}
-        <span className="text-[10px] font-bold text-muted-foreground/60 tracking-wider uppercase whitespace-nowrap shrink-0 pb-0.5 select-none">
+        <span className="text-[11px] leading-tight text-muted-foreground/60 tracking-wider uppercase whitespace-nowrap shrink-0 pb-0.5 select-none">
           7D Delta
         </span>
       </div>

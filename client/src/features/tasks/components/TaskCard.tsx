@@ -90,7 +90,7 @@ const TaskCard = memo(function TaskCard({
 
         {/* Title */}
         <div>
-          <h4 className="font-heading font-extrabold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+          <h4 className="font-heading font-extrabold text-base text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug">
             {task.title}
           </h4>
           {task.description && (

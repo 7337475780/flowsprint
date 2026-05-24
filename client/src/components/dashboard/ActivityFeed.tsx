@@ -42,10 +42,10 @@ export default function ActivityFeed({ activities, className }: ActivityFeedProp
   return (
     <div className={cn('border bg-card rounded-2xl p-6 shadow-2xs space-y-4 flex flex-col justify-between h-80', className)}>
       <div>
-        <h3 className="font-heading font-extrabold text-sm tracking-tight text-foreground">
+        <h3 className="font-heading font-semibold text-base tracking-tight text-foreground">
           Recent Activity Stream
         </h3>
-        <p className="text-3xs font-extrabold text-muted-foreground uppercase tracking-widest mt-0.5 block">
+        <p className="text-xs text-muted-foreground mt-0.5 block">
           Live workspace modifications
         </p>
       </div>
@@ -77,7 +77,7 @@ export default function ActivityFeed({ activities, className }: ActivityFeedProp
                       {act.target}
                     </span>
                   </p>
-                  <span className="text-3xs font-bold text-muted-foreground/60 tracking-wider uppercase block">
+                  <span className="text-[11px] leading-tight text-muted-foreground/60 block">
                     {act.time}
                   </span>
                 </div>

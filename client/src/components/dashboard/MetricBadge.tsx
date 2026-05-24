@@ -17,7 +17,7 @@ export default function MetricBadge({ change, trend, className }: MetricBadgePro
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-3xs font-extrabold font-mono border tracking-wider transition-all',
+        'inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] leading-tight font-semibold tabular-nums border tracking-wide transition-all',
         {
           'bg-emerald-500/10 text-emerald-500 border-emerald-500/20': isUp,
           'bg-rose-500/10 text-rose-500 border-rose-500/20': isDown,

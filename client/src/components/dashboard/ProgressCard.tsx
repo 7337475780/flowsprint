@@ -28,10 +28,10 @@ export default function ProgressCard({
   return (
     <div className={cn('border bg-card rounded-2xl p-6 shadow-2xs space-y-5 flex flex-col justify-between h-80', className)}>
       <div>
-        <h3 className="font-heading font-extrabold text-sm tracking-tight text-foreground">
+        <h3 className="font-heading font-semibold text-base tracking-tight text-foreground">
           Workspace Progress Mapping
         </h3>
-        <p className="text-3xs font-extrabold text-muted-foreground uppercase tracking-widest mt-0.5 block">
+        <p className="text-xs text-muted-foreground mt-0.5 block">
           Workload velocity and milestones
         </p>
       </div>
@@ -45,7 +45,7 @@ export default function ProgressCard({
                   <el.icon className={cn('h-3.5 w-3.5', el.text)} />
                   <span className="font-medium">{el.label}</span>
                 </div>
-                <span className="font-bold text-foreground">{el.value}%</span>
+                <span className="font-bold text-foreground tabular-nums">{el.value}%</span>
               </div>
               <div className="w-full bg-secondary h-2.5 rounded-full overflow-hidden">
                 <div
@@ -62,11 +62,11 @@ export default function ProgressCard({
           <div className="flex items-center gap-2.5 text-xs text-rose-500 min-w-0">
             <AlertCircle className="h-4.5 w-4.5 stroke-[2.2] shrink-0" />
             <div className="min-w-0">
-              <span className="font-bold block leading-tight truncate">Critical Blocker Items</span>
-              <span className="text-3xs text-rose-400 block truncate">Require immediate team review</span>
+              <span className="font-semibold block leading-tight truncate text-sm">Critical Blocker Items</span>
+              <span className="text-xs text-rose-400 block truncate">Require immediate team review</span>
             </div>
           </div>
-          <span className="text-xs font-extrabold text-rose-500 bg-rose-500/10 border border-rose-500/35 h-6 px-2.5 rounded-lg flex items-center justify-center font-mono shrink-0 ml-2">
+          <span className="text-xs font-bold text-rose-500 bg-rose-500/10 border border-rose-500/35 h-6 px-2.5 rounded-lg flex items-center justify-center font-mono tabular-nums shrink-0 ml-2">
             {blockersCount}
           </span>
         </div>

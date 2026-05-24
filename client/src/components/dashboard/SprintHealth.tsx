@@ -28,10 +28,10 @@ export default function SprintHealth({
   return (
     <div className={cn('border bg-card rounded-2xl p-6 shadow-2xs space-y-4 flex flex-col justify-between h-80', className)}>
       <div>
-        <h3 className="font-heading font-extrabold text-sm tracking-tight text-foreground">
+        <h3 className="font-heading font-semibold text-base tracking-tight text-foreground">
           Sprint Cycle Health
         </h3>
-        <p className="text-3xs font-extrabold text-muted-foreground uppercase tracking-widest mt-0.5 block">
+        <p className="text-xs text-muted-foreground mt-0.5 block">
           Agile delivery risk audit
         </p>
       </div>
@@ -48,12 +48,12 @@ export default function SprintHealth({
               })}
             />
             <div className="min-w-0">
-              <span className="font-bold block leading-tight truncate">Sprint Health Status</span>
-              <span className="text-3xs text-muted-foreground block truncate">Scrum velocity rating</span>
+              <span className="font-semibold block leading-tight truncate text-sm">Sprint Health Status</span>
+              <span className="text-xs text-muted-foreground block truncate">Scrum velocity rating</span>
             </div>
           </div>
           <span
-            className={cn('text-3xs font-extrabold px-2.5 py-1 rounded-lg border uppercase tracking-wider shrink-0 ml-2', {
+            className={cn('text-[11px] leading-tight font-extrabold px-2.5 py-1 rounded-lg border uppercase tracking-wider shrink-0 ml-2', {
               'bg-emerald-500/10 text-emerald-500 border-emerald-500/30': riskLevel === 'low',
               'bg-amber-500/10 text-amber-500 border-amber-500/30': riskLevel === 'medium',
               'bg-rose-500/10 text-rose-500 border-rose-500/30': riskLevel === 'high',
@@ -66,9 +66,9 @@ export default function SprintHealth({
         {/* Sprint metric bins */}
         <div className="grid grid-cols-3 gap-2.5 mt-3.5">
           {elements.map((el) => (
-            <div key={el.label} className={cn('border rounded-xl p-3 text-center space-y-0.5', el.color)}>
-              <span className="block text-2xl font-bold font-mono tracking-tight leading-none">{el.count}</span>
-              <span className="text-3xs font-bold uppercase tracking-wider block text-muted-foreground/80">
+            <div key={el.label} className={cn('border rounded-xl p-3 text-center space-y-1', el.color)}>
+              <span className="block text-2xl font-bold font-heading tracking-tight leading-none tabular-nums">{el.count}</span>
+              <span className="text-xs font-medium text-muted-foreground block">
                 {el.label}
               </span>
             </div>

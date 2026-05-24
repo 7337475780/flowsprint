@@ -59,14 +59,14 @@ export default {
       // ─── Custom micro typography scale ───────────────────────────────
       // text-4xs (8px), text-3xs (9px), text-2xs (10px) used across 30+ components
       fontSize: {
-        '4xs': ['0.75rem',    { lineHeight: '1rem' }],      // 12px / 16px
-        '3xs': ['0.75rem',    { lineHeight: '1rem' }],      // 12px / 16px
-        '2xs': ['0.8125rem',  { lineHeight: '1.125rem' }],  // 13px / 18px
+        '4xs': ['0.8125rem', { lineHeight: '1.125rem' }],  // 13px / 18px
+        '3xs': ['0.875rem', { lineHeight: '1.25rem' }],   // 14px / 20px
+        '2xs': ['0.9375rem', { lineHeight: '1.375rem' }],  // 15px / 22px
       },
       // ─── Custom shadow scale ─────────────────────────────────────────
       // shadow-xs / shadow-2xs / shadow-3xs used across 20+ components
       boxShadow: {
-        'xs':  '0 1px 2px 0 rgb(0 0 0 / 0.08)',
+        'xs': '0 1px 2px 0 rgb(0 0 0 / 0.08)',
         '2xs': '0 1px 2px 0 rgb(0 0 0 / 0.06)',
         '3xs': '0 1px 1px 0 rgb(0 0 0 / 0.04)',
       },
