@@ -75,6 +75,12 @@ const projectSchema = new Schema<IProject, ProjectModel>(
       type: Boolean,
       default: false,
     },
+    attachments: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
   },
   {
     timestamps: true, // Automatically manages createdAt and updatedAt

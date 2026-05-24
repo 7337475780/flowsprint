@@ -17,6 +17,7 @@ export interface IProject extends Document {
   tags: string[];
   progress: number;
   isArchived: boolean;
+  attachments?: string[];
   createdAt: Date;
   updatedAt: Date;
 }

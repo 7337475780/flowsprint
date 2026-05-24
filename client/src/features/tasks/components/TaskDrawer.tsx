@@ -1,8 +1,9 @@
-import { X, Calendar, User, Zap, Hourglass, ShieldAlert, Paperclip, ClipboardList } from 'lucide-react';
+import { X, Calendar, User, Zap, Hourglass, ShieldAlert, ClipboardList } from 'lucide-react';
 import { cn } from '../../../lib/utils.js';
 import { useTaskDetailsQuery, useUpdateTaskStatusMutation } from '../hooks/useTasks.js';
 import SubtaskList from './SubtaskList.js';
 import CommentThread from './CommentThread.js';
+import AttachmentSection from '../../files/components/AttachmentSection.js';
 
 interface TaskDrawerProps {
   taskId: string | null;
@@ -174,21 +175,9 @@ export default function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
               <CommentThread task={task} />
             </div>
 
-            {/* 5. Attachments Section (Premium UI Placeholder) */}
-            <div className="p-6 space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                <Paperclip className="h-4 w-4 text-primary" />
-                <span>Task Attachments</span>
-              </div>
-              <div className="border border-dashed rounded-xl p-4 text-center bg-secondary/5 flex flex-col items-center justify-center gap-1">
-                <Paperclip className="h-5 w-5 text-muted-foreground opacity-60" />
-                <span className="text-3xs font-extrabold uppercase tracking-widest text-muted-foreground">
-                  Drag assets here
-                </span>
-                <span className="text-4xs text-muted-foreground">
-                  Supports PDF, PNG, JPG up to 10MB
-                </span>
-              </div>
+            {/* 5. Attachments Section */}
+            <div className="p-6">
+              <AttachmentSection taskId={task._id} projectId={task.projectId || task.project?._id} />
             </div>
 
             {/* 6. Activity log stream (Chronological log display!) */}

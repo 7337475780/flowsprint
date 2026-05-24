@@ -23,13 +23,15 @@ import ProjectPagination from '../features/projects/components/ProjectPagination
 import ProjectModal from '../features/projects/components/ProjectModal.js';
 import KanbanBoard from '../features/projects/components/KanbanBoard.js';
 import type { ProjectInput, Project } from '../features/projects/api/projectApi.js';
+import AttachmentSection from '../features/files/components/AttachmentSection.js';
 
 export default function ProjectsPage() {
   const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
 
   // Layout View States
-  const [view, setView] = useState<'grid' | 'board'>('grid');
+  const [view, setView] = useState<'grid' | 'board' | 'files'>('grid');
+  const [selectedProjectForFiles, setSelectedProjectForFiles] = useState<string | null>(null);
 
   // Search & Filter States
   const [search, setSearch] = useState('');
@@ -195,6 +197,86 @@ export default function ProjectsPage() {
     );
   };
 
+  const renderFilesBrowser = (projectsList: Project[]) => {
+    if (projectsList.length === 0) {
+      return (
+        <EmptyState
+          icon={FolderKanban}
+          title="No projects found"
+          description="Create a project workspace to begin managing project-level file attachments."
+        />
+      );
+    }
+
+    const activeProjId = selectedProjectForFiles || projectsList[0]?._id;
+    const activeProject = projectsList.find((p) => p._id === activeProjId) || projectsList[0];
+
+    return (
+      <div className="grid gap-6 md:grid-cols-[240px_1fr] bg-card/65 border p-5 sm:p-6.5 rounded-2xl shadow-3xs min-h-[500px]">
+        {/* Left Side: Projects List */}
+        <div className="space-y-3.5 border-r pr-5.5 md:block">
+          <span className="text-3xs font-mono font-extrabold uppercase tracking-widest text-muted-foreground block mb-2">
+            Select Workspace
+          </span>
+          <div className="space-y-1.5 max-h-[480px] overflow-y-auto custom-scrollbar">
+            {projectsList.map((p) => {
+              const active = activeProjId === p._id;
+              return (
+                <button
+                  key={p._id}
+                  onClick={() => setSelectedProjectForFiles(p._id)}
+                  className={cn(
+                    'w-full text-left p-3 rounded-xl transition-all border flex items-center justify-between group',
+                    active
+                      ? 'bg-primary text-primary-foreground border-primary font-bold shadow-sm'
+                      : 'bg-card hover:bg-secondary/40 border-secondary text-foreground hover:-translate-x-0.5'
+                  )}
+                >
+                  <div className="min-w-0">
+                    <span className={cn(
+                      'text-xs truncate block transition-colors leading-none font-bold',
+                      active ? 'text-primary-foreground' : 'text-foreground group-hover:text-primary'
+                    )}>
+                      {p.name}
+                    </span>
+                    <span className={cn(
+                      'font-mono text-4xs uppercase tracking-widest block mt-1.5 leading-none',
+                      active ? 'text-primary-foreground/75' : 'text-muted-foreground'
+                    )}>
+                      {p.key}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right Side: Grouped Project Files Viewer */}
+        <div className="space-y-4 min-w-0">
+          {activeProject ? (
+            <div className="space-y-4">
+              <div className="border-b pb-3.5">
+                <h3 className="font-heading font-extrabold text-base text-foreground tracking-tight">
+                  {activeProject.name} Workspace Assets
+                </h3>
+                <p className="text-3xs text-muted-foreground font-medium mt-0.5">
+                  Project short code: <span className="font-mono text-primary font-bold">{activeProject.key}</span>
+                </p>
+              </div>
+              <AttachmentSection projectId={activeProject._id} />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <FolderKanban className="h-10 w-10 text-muted-foreground opacity-60 animate-pulse mb-3" />
+              <p className="text-xs text-muted-foreground font-bold">Please select a project from the left panel</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const projects = data?.data ?? [];
 
   return (
@@ -265,6 +347,19 @@ export default function ProjectsPage() {
               <KanbanSquare className="h-4 w-4" />
               <span className="hidden sm:inline">Board</span>
             </button>
+            <button
+              onClick={() => setView('files')}
+              className={cn(
+                'flex-1 md:flex-initial p-1.5 rounded-md transition-all flex items-center justify-center gap-1.5 text-xs font-semibold',
+                view === 'files'
+                  ? 'bg-card text-foreground shadow-3xs border'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+              title="Files explorer view"
+            >
+              <FolderKanban className="h-4 w-4" />
+              <span className="hidden sm:inline">Files</span>
+            </button>
           </div>
         </div>
       </div>
@@ -279,6 +374,8 @@ export default function ProjectsPage() {
         </div>
       ) : view === 'board' ? (
         renderKanbanBoard(projects)
+      ) : view === 'files' ? (
+        renderFilesBrowser(projects)
       ) : (
         renderProjectsGrid(projects)
       )}

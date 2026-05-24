@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import healthRoutes from './routes/healthRoutes.js';
 import authRoutes from './routes/authRoutes.js';
@@ -11,12 +13,18 @@ import taskRoutes from './modules/tasks/task.routes.js';
 import sprintRoutes from './modules/sprints/sprint.routes.js';
 import analyticsRoutes from './modules/analytics/analytics.routes.js';
 import notificationRoutes from './modules/notifications/notification.routes.js';
+import fileRoutes from './modules/files/file.routes.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
 // 1. Security & Core Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false, // Allow cross-origin images/PDFs for previews
+}));
 
 const allowedOrigins = [
   'http://localhost:5173',
@@ -41,6 +49,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Serve local uploads folder statically for fallback mode
+app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+
 // 4. API Routes Mounting
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
@@ -49,6 +60,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/sprints', sprintRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/files', fileRoutes);
 
 // 5. 404 Catch-All Fallback
 app.use((req, res) => {
