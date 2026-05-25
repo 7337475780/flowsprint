@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAnalyticsOverview } from '../api/analyticsApi.js';
+import { getAnalyticsOverview, getTeamAnalytics } from '../api/analyticsApi.js';
 
 /**
  * Custom hook to retrieve global productivity telemetry metrics.
@@ -14,3 +14,17 @@ export function useAnalyticsOverview() {
     gcTime: 300000,
   });
 }
+
+/**
+ * Custom hook to retrieve team capacity, workloads, and completions telemetry.
+ */
+export function useTeamAnalytics() {
+  return useQuery({
+    queryKey: ['analytics', 'team'],
+    queryFn: getTeamAnalytics,
+    refetchOnWindowFocus: true,
+    staleTime: 60000,
+    gcTime: 300000,
+  });
+}
+

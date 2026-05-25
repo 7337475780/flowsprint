@@ -47,7 +47,7 @@ export default function TaskChart({
   });
 
   return (
-    <div className={cn('border bg-card rounded-2xl p-6 shadow-2xs space-y-4 flex flex-col justify-between h-80', className)}>
+    <div className={cn('border bg-card rounded-2xl p-6 shadow-2xs space-y-4 flex flex-col justify-between h-auto min-h-[320px] sm:h-80', className)}>
       <div>
         <h3 className="font-heading font-semibold text-base tracking-tight text-foreground">
           Task Distribution
@@ -57,7 +57,7 @@ export default function TaskChart({
         </p>
       </div>
 
-      <div className="flex-1 flex flex-col sm:flex-row items-center justify-between gap-6 py-2">
+      <div className="flex-1 flex flex-col sm:flex-row items-center justify-between gap-5 sm:gap-6 py-2">
         {/* Programmatic SVG donut container */}
         <div className="relative w-28 h-28 flex items-center justify-center shrink-0">
           <svg className="w-full h-full -rotate-90 overflow-visible" viewBox="0 0 100 100">
@@ -92,17 +92,17 @@ export default function TaskChart({
           </div>
         </div>
 
-        {/* Status Legends listing */}
-        <div className="flex-1 space-y-2.5 w-full">
+        {/* Status Legends listing - fluid 2-column grid on mobile, stacked column on sm+ viewports */}
+        <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-2.5 sm:flex sm:flex-col sm:space-y-2.5 w-full">
           {segments.map((seg) => (
-            <div key={seg.label} className="flex justify-between items-center">
+            <div key={seg.label} className="flex justify-between items-center min-w-0">
               <div className="flex items-center gap-2 min-w-0">
                 <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: seg.color }} />
-                <span className="text-sm font-medium text-muted-foreground truncate">{seg.label}</span>
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{seg.label}</span>
               </div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-sm font-mono font-semibold text-foreground">{seg.count}</span>
-                <span className="text-xs text-muted-foreground">({Math.round(seg.percent)}%)</span>
+              <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                <span className="text-xs sm:text-sm font-mono font-semibold text-foreground">{seg.count}</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground">({Math.round(seg.percent)}%)</span>
               </div>
             </div>
           ))}

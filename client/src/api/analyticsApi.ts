@@ -1,27 +1,49 @@
 import api from './axios.js';
 
 export interface AnalyticsOverview {
+  totalProjects: number;
   activeProjects: number;
-  activeSprints: number;
+  totalTasks: number;
   completedTasks: number;
   overdueTasks: number;
-  taskDistribution: {
-    backlog?: number;
-    todo?: number;
-    'in-progress'?: number;
-    review?: number;
-    done?: number;
-  };
-  velocitySummary: {
-    avgVelocity: number;
-    count: number;
-  };
+  activeSprints: number;
+  completionRate: number;
+  avgVelocity: number;
+  teamWorkloadIndex: number;
 }
 
 export interface AnalyticsOverviewResponse {
   success: boolean;
   message: string;
   data: AnalyticsOverview;
+}
+
+export interface TeamMemberMetric {
+  userId: string;
+  name: string;
+  avatar?: string;
+  assignedTasks: number;
+  completedTasks: number;
+  overdueTasks: number;
+  completionRate: number;
+  workloadIndex: number;
+  productivityScore: number;
+}
+
+export interface TeamAnalytics {
+  teamMembers: TeamMemberMetric[];
+  averageProductivityScore: number;
+  workloadDistribution: {
+    userId: string;
+    name: string;
+    activeCount: number;
+  }[];
+}
+
+export interface TeamAnalyticsResponse {
+  success: boolean;
+  message: string;
+  data: TeamAnalytics;
 }
 
 /**
@@ -31,3 +53,12 @@ export const getAnalyticsOverview = async (): Promise<AnalyticsOverview> => {
   const { data } = await api.get<AnalyticsOverviewResponse>('/analytics/overview');
   return data.data;
 };
+
+/**
+ * Fetch dynamic team resource workload and capacity allocation metrics.
+ */
+export const getTeamAnalytics = async (): Promise<TeamAnalytics> => {
+  const { data } = await api.get<TeamAnalyticsResponse>('/analytics/team');
+  return data.data;
+};
+

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   FolderKanban,
   ListTodo,
@@ -10,10 +11,11 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore.js';
-import { useAnalyticsOverview } from '../hooks/useAnalytics.js';
+import { useAnalyticsOverview, useTeamAnalytics } from '../hooks/useAnalytics.js';
 import { useSprints } from '../hooks/useSprints.js';
 import { useProjects } from '../hooks/useProjects.js';
 import { useTasks } from '../hooks/useTasks.js';
+import { useNotificationStore } from '../features/notifications/store/notificationStore.js';
 
 // ─── Dashboard Widgets imports ───────────────────────────────────────────────
 import DashboardGrid from '../components/dashboard/DashboardGrid.js';
@@ -30,13 +32,20 @@ export default function DashboardPage() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-  // 1. Fetch real-time DB analytics
+  // 1. Fetch real-time DB analytics and team allocations
   const { data: analytics, isLoading: analyticsLoading } = useAnalyticsOverview();
+  const { data: teamAnalytics, isLoading: teamLoading } = useTeamAnalytics();
   const { data: sprintData, isLoading: sprintsLoading } = useSprints({ limit: 10 });
   const { data: projectData, isLoading: projectsLoading } = useProjects({ limit: 100 });
   const { data: tasksData, isLoading: tasksLoading } = useTasks({ limit: 100 });
 
-  const isLoading = analyticsLoading || sprintsLoading || projectsLoading || tasksLoading;
+  const { notifications, fetchNotifications } = useNotificationStore();
+
+  useEffect(() => {
+    fetchNotifications({ page: 1 });
+  }, [fetchNotifications]);
+
+  const isLoading = analyticsLoading || sprintsLoading || projectsLoading || tasksLoading || teamLoading;
 
   // 2. Data aggregation & fallbacks
   const completedSprintsCount = sprintData?.sprints?.filter((s) => s.status === 'completed').length ?? 2;
@@ -59,13 +68,66 @@ export default function DashboardPage() {
     ).filter(Boolean).length
     : 6;
 
-  const avgVelocity = analytics?.velocitySummary?.avgVelocity
-    ? Math.round(analytics.velocitySummary.avgVelocity * 100)
+  // Real-time dynamic avgVelocity calculation from DB analytics
+  const avgVelocity = analytics?.avgVelocity
+    ? Math.round(analytics.avgVelocity * 100)
     : 72;
 
-  const completionRate = analytics?.completedTasks && tasksData?.total
-    ? Math.round((analytics.completedTasks / tasksData.total) * 100)
-    : 68;
+  // Real-time dynamic completionRate calculation from DB analytics
+  const completionRate = analytics?.completionRate ?? 68;
+
+  // Dynamically group task statuses from database tasks data
+  const taskDistribution = {
+    todo: tasksData?.tasks?.filter((t) => t.status === 'todo').length ?? 12,
+    inProgress: tasksData?.tasks?.filter((t) => t.status === 'in-progress').length ?? 14,
+    review: tasksData?.tasks?.filter((t) => t.status === 'review').length ?? 8,
+    done: tasksData?.tasks?.filter((t) => t.status === 'done').length ?? 16,
+    backlog: tasksData?.tasks?.filter((t) => t.status === 'backlog').length ?? 0,
+  };
+
+  // Calculate Sprint Health onTrack tasks dynamically
+  const sprintHealthOnTrack = tasksData?.tasks?.filter(
+    (t) => t.status !== 'done' && (!t.dueDate || new Date(t.dueDate) >= new Date())
+  ).length ?? 10;
+
+  // Dynamically map notification logs to the Recent Activity stream
+  const mappedActivities = notifications?.slice(0, 5).map((n) => {
+    let type: 'complete' | 'create' | 'update' | 'assign' | 'alert' | 'sprint_start' | 'deadline_change' = 'alert';
+    if (n.type === 'sprint_started') type = 'sprint_start';
+    else if (n.type === 'sprint_completed') type = 'complete';
+    else if (n.type === 'task_assigned') type = 'assign';
+    else if (n.type === 'task_moved' || n.type === 'task_updated' || n.type === 'comment_added') type = 'update';
+
+    const diff = Date.now() - new Date(n.createdAt).getTime();
+    const mins = Math.round(diff / 60000);
+    const hours = Math.round(mins / 60);
+    const days = Math.round(hours / 24);
+    let timeStr = 'Just now';
+    if (days > 0) timeStr = `${days}d ago`;
+    else if (hours > 0) timeStr = `${hours}h ago`;
+    else if (mins > 0) timeStr = `${mins}m ago`;
+
+    // Strip actor's name prefix from the message body for clean presentation
+    const cleanAction = n.message.replace(n.createdBy?.name || '', '').trim();
+
+    return {
+      id: n._id,
+      type,
+      actor: n.createdBy?.name || 'System',
+      action: cleanAction,
+      target: n.title,
+      time: timeStr,
+    };
+  }) ?? [];
+
+  // Dynamically map team resource capacity allocations from teamAnalytics
+  const mappedTeamData = teamAnalytics?.teamMembers?.map((member) => ({
+    id: member.userId,
+    name: member.name,
+    avatar: member.avatar,
+    workload: member.workloadIndex,
+    activeTasks: Math.max(0, member.assignedTasks - member.completedTasks),
+  })) ?? [];
 
   // Formulate KPI array
   const kpis = [
@@ -127,19 +189,16 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* ─── Header row — flex-row at all widths ≥ 640px ──────────────── */}
+      {/* ─── Header row ─── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-6">
         <div className="space-y-1 min-w-0">
-          {/* h1: 30px font-weight 700 per spec */}
           <h1 className="text-3xl font-bold font-heading tracking-tight text-foreground">
             {greeting}, {user?.name?.split(' ')[0] ?? 'there'} 👋
           </h1>
-          {/* Subtitle max-width 600px prevents overly long lines */}
           <p className="text-sm text-muted-foreground/80 max-w-[600px] leading-relaxed">
             Welcome back to FlowSprint. Here is a real-time snapshot of your workspace's planning, backlogs, and agile velocity.
           </p>
         </div>
-        {/* Buttons: shrink-0 so they never wrap below the heading */}
         <div className="flex items-center gap-2.5 shrink-0">
           <Link
             to="/sprints"
@@ -156,9 +215,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ─── KPI Cards ───────────────────────────────────────────────── */}
+      {/* ─── KPI Cards ─── */}
       <div className="space-y-4">
-        {/* Section heading: text-lg font-semibold tracking-tight */}
         <h2 className="text-lg font-semibold font-heading tracking-tight text-foreground">Workspace Telemetry Snapshots</h2>
         <DashboardGrid variant="kpis">
           {isLoading
@@ -167,9 +225,8 @@ export default function DashboardPage() {
         </DashboardGrid>
       </div>
 
-      {/* ─── Analytics & Workload ─────────────────────────────────── */}
+      {/* ─── Analytics & Workload ─── */}
       <div className="space-y-4">
-        {/* Section heading: identical style to the KPI heading above */}
         <h2 className="text-lg font-semibold font-heading tracking-tight text-foreground">Analytics & Workload Streams</h2>
         <DashboardGrid variant="widgets">
           {/* Donut task chart */}
@@ -177,10 +234,10 @@ export default function DashboardPage() {
             <SkeletonCard variant="chart" />
           ) : (
             <TaskChart
-              todo={analytics?.taskDistribution?.todo || analytics?.taskDistribution?.backlog || 12}
-              inProgress={analytics?.taskDistribution?.['in-progress'] || 14}
-              review={analytics?.taskDistribution?.review || 8}
-              done={analytics?.taskDistribution?.done || 16}
+              todo={taskDistribution.todo + taskDistribution.backlog}
+              inProgress={taskDistribution.inProgress}
+              review={taskDistribution.review}
+              done={taskDistribution.done}
             />
           )}
 
@@ -201,7 +258,7 @@ export default function DashboardPage() {
             <SkeletonCard variant="progress" />
           ) : (
             <SprintHealth
-              onTrack={10}
+              onTrack={sprintHealthOnTrack}
               delayed={analytics?.overdueTasks ?? 2}
               blocked={sprintData?.sprints?.filter((s) => s.status === 'cancelled').length ?? 1}
               riskLevel={analytics?.overdueTasks && analytics.overdueTasks > 4 ? 'high' : 'low'}
@@ -212,14 +269,14 @@ export default function DashboardPage() {
           {isLoading ? (
             <SkeletonCard variant="list" />
           ) : (
-            <ActivityFeed />
+            <ActivityFeed activities={mappedActivities} />
           )}
 
           {/* Teammate balances */}
           {isLoading ? (
             <SkeletonCard variant="list" />
           ) : (
-            <TeamLoad />
+            <TeamLoad teamData={mappedTeamData} />
           )}
         </DashboardGrid>
       </div>
