@@ -6,6 +6,7 @@ import {
   getSprintAnalytics,
   getTeamAnalytics,
   getTrendAnalytics,
+  seedDatabase,
 } from './analytics.controller.js';
 
 const router = Router();
@@ -18,5 +19,8 @@ router.get('/projects/:projectId', getProjectAnalytics);
 router.get('/sprints/:sprintId', getSprintAnalytics);
 router.get('/team', getTeamAnalytics);
 router.get('/trends', getTrendAnalytics);
+
+// Endpoint to trigger database seeding directly from the web interface
+router.post('/seed', seedDatabase);
 
 export default router;
