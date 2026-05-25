@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Zap, User, Mail, Lock, ArrowRight } from 'lucide-react';
+import { User, Mail, Lock, ArrowRight } from 'lucide-react';
 import { registerSchema, type RegisterFormValues } from '../schemas/authSchemas.js';
 import { register as apiRegister } from '../../../api/authApi.js';
 import { useAuthStore } from '../../../store/authStore.js';
@@ -49,8 +49,12 @@ export default function RegisterPage() {
         {/* Brand */}
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-2 mb-4">
-            <div className="p-2 bg-primary/10 text-primary rounded-xl">
-              <Zap className="h-6 w-6 fill-current" />
+            <div className="p-1.5 bg-primary/10 rounded-xl flex items-center justify-center w-[38px] h-[38px]">
+              <img
+                src="/logo.png"
+                alt="FlowSprint"
+                className="h-6 w-6 object-contain rounded-md"
+              />
             </div>
             <span className="font-heading font-extrabold text-2xl tracking-tight">FlowSprint</span>
           </div>

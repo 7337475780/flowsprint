@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { FolderKanban, Plus, Grid, KanbanSquare, Loader2 } from 'lucide-react';
+import { FolderKanban, Plus, Grid, KanbanSquare } from 'lucide-react';
 import PageHeader from '../components/common/PageHeader.js';
 import EmptyState from '../components/common/EmptyState.js';
+import Loader from '../components/common/Loader.js';
 import { useAuthStore } from '../store/authStore.js';
 import { cn } from '../lib/utils.js';
 import { hasPermission } from '../lib/permissions.js';
@@ -368,7 +369,7 @@ export default function ProjectsPage() {
       {/* Main Workspace Area */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed rounded-2xl bg-card/50">
-          <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
+          <Loader size="lg" className="mb-4" />
           <p className="text-sm text-muted-foreground font-medium">
             Fetching project workspaces...
           </p>

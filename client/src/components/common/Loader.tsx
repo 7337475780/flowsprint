@@ -15,73 +15,32 @@ export default function Loader({ fullscreen, size = 'md', className }: LoaderPro
 
   if (fullscreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-slate-950 transition-colors duration-300">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 transition-colors duration-300">
         <div className="relative flex flex-col items-center gap-6">
-          
-          {/* SVG Brand Path Logo */}
-          <svg
-            viewBox="0 0 120 120"
-            className="w-28 h-28 animate-pulse"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <linearGradient id="loadBottomGrad" x1="0" y1="1" x2="1" y2="0">
-                <stop offset="0%" stopColor="#1D4ED8" />
-                <stop offset="100%" stopColor="#3b82f6" />
-              </linearGradient>
-              <linearGradient id="loadMiddleGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#0EA5E9" />
-                <stop offset="100%" stopColor="#38bdf8" />
-              </linearGradient>
-              <linearGradient id="loadTopGrad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#2563EB" />
-                <stop offset="100%" stopColor="#1D4ED8" />
-              </linearGradient>
-            </defs>
-
-            {/* Bottom Flow */}
-            <path
-              d="M15 95C24 62 38 58 48 58C62 58 62 84 78 84"
-              stroke="url(#loadBottomGrad)"
-              strokeWidth="18"
-              strokeLinecap="round"
-              className="animate-draw1"
+          {/* Logo container with animated rotating gradient ring */}
+          <div className="relative flex items-center justify-center w-28 h-28 shrink-0">
+            {/* Spinning gradient ring */}
+            <div className="absolute inset-0 rounded-full border-2 border-dashed border-primary/45 animate-[spin_8s_linear_infinite]" />
+            <div className="absolute inset-2 rounded-full border border-dashed border-indigo-500/25 animate-[spin_6s_linear_infinite_reverse]" />
+            {/* Soft background glow */}
+            <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl animate-pulse-subtle" />
+            
+            {/* Centered logo image with a floating/scaling micro-animation */}
+            <img
+              src="/logo.png"
+              alt="FlowSprint Loader"
+              className="relative w-16 h-16 object-contain rounded-2xl animate-[pulse-subtle_2s_ease-in-out_infinite]"
             />
-
-            {/* Middle Flow */}
-            <path
-              d="M28 55C35 42 45 38 58 38H72"
-              stroke="url(#loadMiddleGrad)"
-              strokeWidth="14"
-              strokeLinecap="round"
-              className="animate-draw2"
-            />
-
-            {/* Top Arrow */}
-            <path
-              d="M20 35C28 15 42 12 58 12H85"
-              stroke="url(#loadTopGrad)"
-              strokeWidth="16"
-              strokeLinecap="round"
-              className="animate-draw3"
-            />
-
-            <path
-              d="M84 2L108 18L84 34"
-              fill="url(#loadTopGrad)"
-              className="animate-arrow"
-            />
-          </svg>
+          </div>
 
           {/* Text Title */}
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-heading">
+          <h1 className="text-2xl font-bold tracking-tight text-white font-heading">
             FlowSprint
           </h1>
 
           {/* Sprint Progress bar */}
-          <div className="w-40 h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-            <div className="h-full w-1/2 bg-blue-600 dark:bg-indigo-500 animate-progress rounded-full"></div>
+          <div className="w-40 h-1 bg-slate-800 rounded-full overflow-hidden">
+            <div className="h-full w-1/2 bg-gradient-to-r from-primary to-indigo-500 animate-progress rounded-full"></div>
           </div>
         </div>
       </div>

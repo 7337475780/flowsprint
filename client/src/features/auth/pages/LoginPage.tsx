@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Zap, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { loginSchema, type LoginFormValues } from '../schemas/authSchemas.js';
 import { login } from '../../../api/authApi.js';
 import { useAuthStore } from '../../../store/authStore.js';
@@ -42,8 +42,12 @@ export default function LoginPage() {
         {/* Brand Header */}
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-2.5 mb-4 group select-none">
-            <div className="p-2.5 bg-primary/10 text-primary rounded-xl border border-primary/20 transition-transform duration-500 group-hover:rotate-[360deg] shadow-xs">
-              <Zap className="h-6 w-6 fill-current animate-pulse-subtle" />
+            <div className="p-1.5 bg-primary/10 rounded-xl border border-primary/20 transition-transform duration-500 group-hover:rotate-[360deg] shadow-xs flex items-center justify-center w-11 h-11">
+              <img
+                src="/logo.png"
+                alt="FlowSprint"
+                className="h-8 w-8 object-contain rounded-lg"
+              />
             </div>
             <span className="font-heading font-extrabold text-2xl tracking-tight text-foreground bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text">
               FlowSprint

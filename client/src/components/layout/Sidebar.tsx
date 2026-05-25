@@ -121,50 +121,12 @@ export default function Sidebar() {
             )}
             title="FlowSprint"
           >
-            <div className="shrink-0 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm transition-transform duration-300 hover:rotate-6">
-              <svg
-                viewBox="0 0 120 120"
-                className="h-[22px] w-[22px]"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <linearGradient id="sideBottomGrad" x1="0" y1="1" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#1D4ED8" />
-                    <stop offset="100%" stopColor="#3b82f6" />
-                  </linearGradient>
-                  <linearGradient id="sideMiddleGrad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#0EA5E9" />
-                    <stop offset="100%" stopColor="#38bdf8" />
-                  </linearGradient>
-                  <linearGradient id="sideTopGrad" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#2563EB" />
-                    <stop offset="100%" stopColor="#1D4ED8" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M15 95C24 62 38 58 48 58C62 58 62 84 78 84"
-                  stroke="url(#sideBottomGrad)"
-                  strokeWidth="18"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M28 55C35 42 45 38 58 38H72"
-                  stroke="url(#sideMiddleGrad)"
-                  strokeWidth="14"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M20 35C28 15 42 12 58 12H85"
-                  stroke="url(#sideTopGrad)"
-                  strokeWidth="16"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M84 2L108 18L84 34"
-                  fill="url(#sideTopGrad)"
-                />
-              </svg>
+            <div className="shrink-0 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm transition-transform duration-300 hover:rotate-6 flex items-center justify-center w-[30px] h-[30px]">
+              <img
+                src="/logo.png"
+                alt="FlowSprint"
+                className="h-[22px] w-[22px] object-contain rounded-md"
+              />
             </div>
             {!collapsed && (
               <span className="font-bold text-slate-900 dark:text-white text-base tracking-tight truncate">
