@@ -501,6 +501,8 @@ export const seedDatabase = async (req: AuthenticatedRequest, res: Response): Pr
       const item = tasksToCreate[i];
       const task = await Task.create({
         ...item,
+        project: project1._id,
+        projectId: project1._id,
         order: i,
         position: i,
         subtasks: [
