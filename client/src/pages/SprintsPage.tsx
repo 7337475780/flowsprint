@@ -275,9 +275,9 @@ export default function SprintsPage() {
           }
         />
       ) : (
-        <div className="grid gap-6 grid-cols-1 lg:grid-cols-12">
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* LEFT COLUMN: Sprint List */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="w-full lg:w-[380px] shrink-0 space-y-6">
             {activeAndPlanned.length > 0 && (
               <div className="space-y-3">
                 <span className="text-3xs font-extrabold uppercase tracking-widest text-indigo-400 block px-1">
@@ -324,7 +324,7 @@ export default function SprintsPage() {
           </div>
 
           {/* RIGHT COLUMN: Selected Sprint Detail Workspace */}
-          <div className="lg:col-span-8">
+          <div className="flex-1 min-w-0 w-full">
             {!selectedSprintId ? (
               <div className="h-full flex flex-col items-center justify-center p-8 border border-dashed rounded-3xl bg-card/20 text-center min-h-[400px]">
                 <Layers className="h-10 w-10 text-muted-foreground/50 mb-3" />
