@@ -20,25 +20,11 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install Root Dependencies
+      - name: Install Dependencies
         run: npm ci
 
-      - name: Install Client Dependencies
-        run: |
-          cd client
-          npm ci
-
-      - name: Install Server Dependencies
-        run: |
-          cd server
-          npm ci
-
       - name: Verify Client Build Compilation
-        run: |
-          cd client
-          npm run build
+        run: npm run build:client
 
       - name: Verify Server Build Compilation
-        run: |
-          cd server
-          npm run build
+        run: npm run build:server
