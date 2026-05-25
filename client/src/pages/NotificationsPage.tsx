@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
-import { CheckCheck, RefreshCw, Inbox, Settings } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { CheckCheck, RefreshCw, Inbox, Settings, BellRing } from 'lucide-react';
 import PageHeader from '../components/common/PageHeader.js';
 import NotificationList from '../features/notifications/components/NotificationList.js';
 import NotificationFilters from '../features/notifications/components/NotificationFilters.js';
 import NotificationSettings from '../features/notifications/components/NotificationSettings.js';
 import { useNotificationStore } from '../features/notifications/store/notificationStore.js';
+import { useAuthStore } from '../store/authStore.js';
+import { initSocket } from '../lib/socketService.js';
 import { cn } from '../lib/utils.js';
 
 export default function NotificationsPage() {
@@ -12,6 +14,9 @@ export default function NotificationsPage() {
   const [selectedType, setSelectedType] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [activeSubTab, setActiveSubTab] = useState<'inbox' | 'preferences'>('inbox');
+
+  const token = useAuthStore((s) => s.token);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const {
     notifications,
@@ -22,18 +27,47 @@ export default function NotificationsPage() {
     markAllAsRead,
   } = useNotificationStore();
 
-  const handleFetch = () => {
+  const handleFetch = useCallback(() => {
     fetchNotifications({
       page: currentPage,
       unread: currentTab === 'unread',
       type: selectedType || undefined,
     });
-  };
+  }, [currentPage, currentTab, selectedType, fetchNotifications]);
 
   // Re-fetch when tab, filters, or page index changes
   useEffect(() => {
     handleFetch();
   }, [currentTab, selectedType, currentPage]);
+
+  // Ensure socket is connected for live notification updates on this page
+  useEffect(() => {
+    if (isAuthenticated && token) {
+      initSocket(token);
+    }
+  }, [isAuthenticated, token]);
+
+  // Re-fetch when a new live notification arrives (subscribe to store changes)
+  // The notificationStore.addNotification() is called from socketService when 
+  // notification:new fires — so the list auto-updates in real-time via Zustand
+  // state injection. When the user is on "unread" tab, we refresh the full list
+  // to maintain correct ordering on new notification arrival.
+  useEffect(() => {
+    let prevUnreadCount = useNotificationStore.getState().unreadCount;
+
+    const unsub = useNotificationStore.subscribe((state) => {
+      if (state.unreadCount !== prevUnreadCount) {
+        prevUnreadCount = state.unreadCount;
+        // New notification arrived — re-fetch to keep list ordered
+        fetchNotifications({
+          page: currentPage,
+          unread: currentTab === 'unread',
+          type: selectedType || undefined,
+        });
+      }
+    });
+    return () => unsub();
+  }, [currentPage, currentTab, selectedType]);
 
   const handleMarkAllRead = async () => {
     await markAllAsRead();
@@ -79,6 +113,12 @@ export default function NotificationsPage() {
             Preferences
           </button>
         </div>
+      </div>
+
+      {/* Live indicator banner */}
+      <div className="flex items-center gap-2 text-2xs text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2 max-w-fit">
+        <BellRing className="h-3.5 w-3.5 animate-[pulse_1.5s_ease-in-out_infinite]" />
+        Live notifications active — updates appear instantly
       </div>
 
       {activeSubTab === 'inbox' ? (

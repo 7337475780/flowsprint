@@ -9,9 +9,45 @@ import TeamPerformance from '../features/analytics/components/TeamPerformance.js
 import TrendGraph from '../features/analytics/components/TrendGraph.js';
 import AnalyticsFilters from '../features/analytics/components/AnalyticsFilters.js';
 import { useAnalyticsStore } from '../features/analytics/store/analyticsStore.js';
-import Loader from '../components/common/Loader.js';
 import { ShieldAlert, CheckCircle, Calendar, Layers, Activity } from 'lucide-react';
 import { cn } from '../lib/utils.js';
+
+/** Animated skeleton card placeholder for loading states */
+function SkeletonCard({ className }: { className?: string }) {
+  return (
+    <div className={cn('rounded-xl border bg-card p-5 shadow-2xs animate-pulse', className)}>
+      <div className="h-3 w-24 bg-secondary/60 rounded mb-3" />
+      <div className="h-7 w-32 bg-secondary/50 rounded mb-2" />
+      <div className="h-2.5 w-20 bg-secondary/40 rounded" />
+    </div>
+  );
+}
+
+function ChartSkeleton({ className }: { className?: string }) {
+  return (
+    <div className={cn('rounded-xl border bg-card p-6 shadow-sm animate-pulse', className)}>
+      <div className="h-3 w-28 bg-secondary/60 rounded mb-4" />
+      <div className="h-[180px] bg-secondary/30 rounded-lg" />
+    </div>
+  );
+}
+
+/** Loading overlay that shows inside the active tab area */
+function TabLoadingState() {
+  return (
+    <div className="space-y-6 animate-in fade-in duration-200">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <SkeletonCard />
+        <SkeletonCard />
+        <SkeletonCard />
+      </div>
+      <div className="grid gap-6 md:grid-cols-2">
+        <ChartSkeleton />
+        <ChartSkeleton />
+      </div>
+    </div>
+  );
+}
 
 export default function AnalyticsPage() {
   const {
@@ -53,8 +89,9 @@ export default function AnalyticsPage() {
       {/* Selectors and Category Tab Headers */}
       <AnalyticsFilters />
 
+      {/* Tab Content with per-tab loader */}
       {isLoading ? (
-        <Loader className="py-24" />
+        <TabLoadingState />
       ) : (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-200">
           
@@ -153,6 +190,9 @@ export default function AnalyticsPage() {
                     </div>
                   </div>
                 </>
+              ) : selectedProjectId ? (
+                /* Project ID exists but no data yet — show skeleton */
+                <TabLoadingState />
               ) : (
                 <div className="rounded-xl border bg-card p-12 text-center text-muted-foreground border-dashed">
                   Select a Project scope to load analytics.
@@ -218,6 +258,8 @@ export default function AnalyticsPage() {
 
                   <SprintBurndown />
                 </>
+              ) : selectedSprintId ? (
+                <TabLoadingState />
               ) : (
                 <div className="rounded-xl border bg-card p-12 text-center text-muted-foreground border-dashed">
                   Select a Sprint scope to load analytics.

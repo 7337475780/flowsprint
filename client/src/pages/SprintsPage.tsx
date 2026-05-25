@@ -80,7 +80,7 @@ export default function SprintsPage() {
   });
   const sprints = sprintsData?.sprints || [];
 
-  const { data: projectsData } = useProjectsQuery({ limit: 100 });
+  const { data: projectsData, isLoading: projectsLoading } = useProjectsQuery({ limit: 100 });
   const projects = projectsData?.data || [];
 
   // 2. Fetch Selected Sprint Details
@@ -229,6 +229,7 @@ export default function SprintsPage() {
           projectId={projectId}
           status={status}
           projects={projects}
+          isLoadingProjects={projectsLoading}
           onProjectIdChange={(id) => {
             setProjectId(id);
             setSelectedSprintId(null); // Reset detail view
