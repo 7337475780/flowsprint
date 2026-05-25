@@ -3,6 +3,7 @@ import { useAnalyticsStore } from '../store/analyticsStore.js';
 import { cn } from '../../../lib/utils.js';
 import api from '../../../api/axios.js';
 import { TrendingUp, Layers, Folder, Users, Calendar } from 'lucide-react';
+import Loader from '../../../components/common/Loader.js';
 
 interface DropdownItem {
   _id: string;
@@ -17,6 +18,7 @@ export default function AnalyticsFilters() {
     setSelectedProjectId,
     selectedSprintId,
     setSelectedSprintId,
+    isLoading,
   } = useAnalyticsStore();
 
   const [projects, setProjects] = useState<DropdownItem[]>([]);
@@ -96,24 +98,29 @@ export default function AnalyticsFilters() {
               <label className="text-3xs font-black uppercase text-muted-foreground tracking-widest uppercase">
                 Select Project Scope:
               </label>
-              <select
-                value={selectedProjectId}
-                onChange={(e) => setSelectedProjectId(e.target.value)}
-                className={cn(
-                  'text-xs font-semibold rounded-lg border bg-card outline-none px-3 py-1.5 cursor-pointer min-w-[160px]',
-                  'focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all'
-                )}
-              >
-                {projects.length === 0 ? (
-                  <option value="">No projects found</option>
-                ) : (
-                  projects.map((p) => (
-                    <option key={p._id} value={p._id}>
-                      {p.name}
-                    </option>
-                  ))
-                )}
-              </select>
+              <div className="flex items-center gap-2">
+                <select
+                  value={selectedProjectId}
+                  onChange={(e) => setSelectedProjectId(e.target.value)}
+                  disabled={isLoading}
+                  className={cn(
+                    'text-xs font-semibold rounded-lg border bg-card outline-none px-3 py-1.5 cursor-pointer min-w-[160px]',
+                    'focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all',
+                    isLoading && 'opacity-60 cursor-not-allowed'
+                  )}
+                >
+                  {projects.length === 0 ? (
+                    <option value="">No projects found</option>
+                  ) : (
+                    projects.map((p) => (
+                      <option key={p._id} value={p._id}>
+                        {p.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+                {isLoading && <Loader size="sm" className="shrink-0" />}
+              </div>
             </div>
           )}
 
@@ -122,24 +129,29 @@ export default function AnalyticsFilters() {
               <label className="text-3xs font-black uppercase text-muted-foreground tracking-widest uppercase">
                 Select Sprint Scope:
               </label>
-              <select
-                value={selectedSprintId}
-                onChange={(e) => setSelectedSprintId(e.target.value)}
-                className={cn(
-                  'text-xs font-semibold rounded-lg border bg-card outline-none px-3 py-1.5 cursor-pointer min-w-[160px]',
-                  'focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all'
-                )}
-              >
-                {sprints.length === 0 ? (
-                  <option value="">No sprints planned</option>
-                ) : (
-                  sprints.map((s) => (
-                    <option key={s._id} value={s._id}>
-                      {s.name}
-                    </option>
-                  ))
-                )}
-              </select>
+              <div className="flex items-center gap-2">
+                <select
+                  value={selectedSprintId}
+                  onChange={(e) => setSelectedSprintId(e.target.value)}
+                  disabled={isLoading}
+                  className={cn(
+                    'text-xs font-semibold rounded-lg border bg-card outline-none px-3 py-1.5 cursor-pointer min-w-[160px]',
+                    'focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all',
+                    isLoading && 'opacity-60 cursor-not-allowed'
+                  )}
+                >
+                  {sprints.length === 0 ? (
+                    <option value="">No sprints planned</option>
+                  ) : (
+                    sprints.map((s) => (
+                      <option key={s._id} value={s._id}>
+                        {s.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+                {isLoading && <Loader size="sm" className="shrink-0" />}
+              </div>
             </div>
           )}
         </div>

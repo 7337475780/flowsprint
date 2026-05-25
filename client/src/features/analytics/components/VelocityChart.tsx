@@ -152,7 +152,9 @@ export default function VelocityChart() {
                 textAnchor="middle"
                 className="fill-muted-foreground text-5xs font-black tracking-wider uppercase font-sans"
               >
-                {bar.name.replace(/sprint/i, 'Sp')}
+                {bar.name.toLowerCase().includes('sprint')
+                  ? bar.name.replace(/sprint\s*(\d+).*/i, 'Sp $1')
+                  : (bar.name.length > 8 ? bar.name.substring(0, 8) + '...' : bar.name)}
               </text>
 
               {/* Percentage label above group */}
